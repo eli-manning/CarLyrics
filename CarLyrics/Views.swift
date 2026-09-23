@@ -1,8 +1,27 @@
 import SwiftUI
 
-enum Theme {
-    static let accent = Color(red: 1.0, green: 0.82, blue: 0.25)
-    static let background = Color(red: 0.05, green: 0.05, blue: 0.08)
+private let lyricFont = Font.system(size: 30, weight: .bold)
+
+/// Blurred album art over a color sampled from it, like the Apple Music lyrics screen.
+struct ArtworkBackdrop: View {
+    let image: UIImage?
+    let tintHex: String
+
+    var body: some View {
+        ZStack {
+            Color(hex: tintHex)
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .blur(radius: 70)
+                    .opacity(0.45)
+                    .scaleEffect(1.4)
+            }
+            LinearGradient(colors: [.clear, .black.opacity(0.35)], startPoint: .top, endPoint: .bottom)
+        }
+        .ignoresSafeArea()
+    }
 }
 
 struct LoginView: View {
@@ -12,41 +31,56 @@ struct LoginView: View {
     @State private var busy = false
 
     var body: some View {
-        VStack(spacing: 28) {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("CarLyrics")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.6))
+                .padding(.top, 24)
+
             Spacer()
-            Image(systemName: "music.mic")
-                .font(.system(size: 72, weight: .semibold))
-                .foregroundStyle(Theme.accent)
-            VStack(spacing: 8) {
-                Text("CarLyrics").font(.largeTitle.bold())
-                Text("Karaoke lyrics for whatever's playing on Spotify — on your Lock Screen and CarPlay.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
+
+            // A preview of what the lyrics screen does.
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Lyrics for whatever").foregroundStyle(.white.opacity(0.3))
+                Text("you're playing on Spotify,").foregroundStyle(.white)
+                Text("one line at a time.").foregroundStyle(.white.opacity(0.3))
             }
+            .font(lyricFont)
+
             Spacer()
-            Button {
-                Task {
-                    busy = true; defer { busy = false }
-                    do {
-                        try await auth.logIn()
-                        engine.appBecameActive()
-                    } catch { self.error = error.localizedDescription }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("They follow along on your Lock Screen and in CarPlay.")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.6))
+
+                Button {
+                    Task {
+                        busy = true; defer { busy = false }
+                        do {
+                            try await auth.logIn()
+                            engine.appBecameActive()
+                        } catch { self.error = error.localizedDescription }
+                    }
+                } label: {
+                    Text(busy ? "Connecting…" : "Connect Spotify")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.white, in: .rect(cornerRadius: 14))
+                        .foregroundStyle(.black)
                 }
-            } label: {
-                Label(busy ? "Connecting…" : "Connect Spotify", systemImage: "link")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green, in: .capsule)
-                    .foregroundStyle(.black)
-            }
-            .disabled(busy)
-            if let error {
-                Text(error).font(.footnote).foregroundStyle(.red).multilineTextAlignment(.center)
+                .disabled(busy)
+
+                if let error {
+                    Text(error).font(.footnote).foregroundStyle(.white.opacity(0.7))
+                }
             }
         }
-        .padding(24)
-        .background(Theme.background.ignoresSafeArea())
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ArtworkBackdrop(image: nil, tintHex: Color.defaultTintHex))
     }
 }
 
@@ -57,56 +91,78 @@ struct NowPlayingView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Divider().opacity(0.3)
             LyricsScroller()
-            controls
+                .mask(LinearGradient(stops: [
+                    .init(color: .clear, location: 0), .init(color: .black, location: 0.08),
+                    .init(color: .black, location: 0.85), .init(color: .clear, location: 1),
+                ], startPoint: .top, endPoint: .bottom))
+            footer
         }
-        .background(Theme.background.ignoresSafeArea())
-        .sheet(isPresented: $showSettings) { SettingsView().presentationDetents([.medium]) }
+        .background(ArtworkBackdrop(image: engine.artwork, tintHex: engine.tintHex))
+        .sheet(isPresented: $showSettings) { SettingsView().presentationDetents([.medium, .large]) }
     }
 
     private var header: some View {
-        HStack(spacing: 14) {
-            AsyncImage(url: engine.track?.artworkURL) { img in
-                img.resizable().scaledToFill()
-            } placeholder: {
-                Color.white.opacity(0.08).overlay(Image(systemName: "music.note").foregroundStyle(.secondary))
+        HStack(spacing: 12) {
+            Group {
+                if let art = engine.artwork {
+                    Image(uiImage: art).resizable().scaledToFill()
+                } else {
+                    Color.white.opacity(0.1)
+                }
             }
-            .frame(width: 56, height: 56)
-            .clipShape(.rect(cornerRadius: 8))
+            .frame(width: 48, height: 48)
+            .clipShape(.rect(cornerRadius: 6))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(engine.track?.title ?? "Nothing playing").font(.headline).lineLimit(1)
-                Text(engine.track?.artistLine ?? "Play something in Spotify").font(.subheadline)
-                    .foregroundStyle(.secondary).lineLimit(1)
+                Text(engine.track?.title ?? "Nothing playing")
+                    .font(.system(size: 16, weight: .semibold))
+                Text(engine.track?.artistLine ?? "Play something on Spotify")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.white.opacity(0.6))
             }
+            .lineLimit(1)
+
             Spacer()
+
             Button { showSettings = true } label: {
-                Image(systemName: "slider.horizontal.3").font(.title3)
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 15, weight: .bold))
+                    .frame(width: 34, height: 34)
+                    .background(.white.opacity(0.12), in: .circle)
             }
-            .tint(.secondary)
+            .accessibilityLabel("Settings")
         }
-        .padding(.horizontal, 16).padding(.vertical, 12)
+        .foregroundStyle(.white)
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
     }
 
-    private var controls: some View {
-        VStack(spacing: 8) {
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 10) {
             if let err = engine.errorMessage {
-                Text(err).font(.caption).foregroundStyle(.orange).multilineTextAlignment(.center)
+                Text(err).font(.footnote).foregroundStyle(.white.opacity(0.75))
             }
-            Button {
-                engine.liveActivityOn ? engine.stopLiveActivity() : engine.startLiveActivity()
-            } label: {
-                Label(engine.liveActivityOn ? "Showing on CarPlay & Lock Screen" : "Show on CarPlay & Lock Screen",
-                      systemImage: engine.liveActivityOn ? "car.fill" : "car")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(engine.liveActivityOn ? Theme.accent : Color.white.opacity(0.1), in: .capsule)
-                    .foregroundStyle(engine.liveActivityOn ? .black : .primary)
+            Toggle(isOn: Binding(
+                get: { engine.liveActivityOn },
+                set: { $0 ? engine.startLiveActivity() : engine.stopLiveActivity() }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Show in CarPlay").font(.system(size: 15, weight: .semibold))
+                    Text("Also appears on your Lock Screen")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
             }
+            .tint(.white.opacity(0.35))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(.black.opacity(0.2), in: .rect(cornerRadius: 14))
         }
-        .padding(16)
+        .foregroundStyle(.white)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
     }
 }
 
@@ -114,59 +170,51 @@ struct LyricsScroller: View {
     @EnvironmentObject private var engine: LyricsEngine
 
     var body: some View {
-        Group {
-            switch engine.status {
-            case .idle: placeholder("Play a song in Spotify", icon: "play.circle")
-            case .loading: ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            case .notFound: placeholder("No lyrics found for this song", icon: "text.badge.xmark")
-            case .instrumental: placeholder("Instrumental", icon: "pianokeys")
-            case .found: lyricsList
-            }
+        switch engine.status {
+        case .idle: message("Play something on Spotify and the lyrics will show up here.")
+        case .loading: message("Looking up lyrics…")
+        case .notFound: message("Couldn't find lyrics for this song.")
+        case .instrumental: message("Instrumental")
+        case .found: lyricsList
         }
     }
 
     private var lyricsList: some View {
         ScrollViewReader { proxy in
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 26) {
                     if engine.lyrics?.isSynced == false {
-                        Label("Timing estimated — no synced lyrics for this song", systemImage: "clock.badge.questionmark")
-                            .font(.caption).foregroundStyle(.secondary)
+                        Text("These lyrics aren't synced, so the timing is a guess.")
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.5))
                     }
                     ForEach(engine.lyrics?.lines ?? []) { line in
-                        let state = lineState(line.id)
+                        let isCurrent = line.id == engine.currentIndex
                         Text(line.text)
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundStyle(state == .current ? Theme.accent : .white.opacity(state == .past ? 0.3 : 0.55))
-                            .scaleEffect(state == .current ? 1.04 : 1, anchor: .leading)
+                            .font(lyricFont)
+                            .foregroundStyle(.white.opacity(isCurrent ? 1 : 0.32))
+                            .blur(radius: isCurrent ? 0 : 0.4)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .id(line.id)
-                            .animation(.easeOut(duration: 0.25), value: state)
+                            .animation(.easeOut(duration: 0.3), value: isCurrent)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 200)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 220)
             }
             .onChange(of: engine.currentIndex) { _, idx in
-                withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx ?? 0, anchor: .center) }
+                withAnimation(.spring(duration: 0.5)) { proxy.scrollTo(idx ?? 0, anchor: UnitPoint(x: 0, y: 0.35)) }
             }
-            .onAppear { proxy.scrollTo(engine.currentIndex ?? 0, anchor: .center) }
+            .onAppear { proxy.scrollTo(engine.currentIndex ?? 0, anchor: UnitPoint(x: 0, y: 0.35)) }
         }
     }
 
-    private enum LineState { case past, current, upcoming }
-    private func lineState(_ id: Int) -> LineState {
-        guard let cur = engine.currentIndex else { return .upcoming }
-        return id < cur ? .past : (id == cur ? .current : .upcoming)
-    }
-
-    private func placeholder(_ text: String, icon: String) -> some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon).font(.system(size: 40))
-            Text(text)
-        }
-        .foregroundStyle(.secondary)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    private func message(_ text: String) -> some View {
+        Text(text)
+            .font(lyricFont)
+            .foregroundStyle(.white.opacity(0.4))
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }
 
@@ -178,22 +226,29 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    VStack(alignment: .leading) {
-                        Text("Lyrics offset: \(engine.offsetMs >= 0 ? "+" : "")\(Int(engine.offsetMs)) ms")
-                        Slider(value: $engine.offsetMs, in: -2000...2000, step: 100)
+                    LabeledContent("Timing offset") {
+                        Text(engine.offsetMs == 0 ? "None" : String(format: "%+.1f s", engine.offsetMs / 1000))
+                            .monospacedDigit()
                     }
-                    Button("Reset offset") { engine.offsetMs = 0 }
+                    Slider(value: $engine.offsetMs, in: -2000...2000, step: 100)
+                    if engine.offsetMs != 0 {
+                        Button("Reset") { engine.offsetMs = 0 }
+                    }
                 } footer: {
-                    Text("Positive shows lyrics earlier. Useful over Bluetooth, which adds audio delay.")
+                    Text("If lyrics show up after the singer, slide right. Bluetooth audio usually runs a little behind.")
                 }
                 Section {
-                    Toggle("Auto-show on CarPlay when app opens", isOn: engine.$autoStartLiveActivity)
+                    Toggle("Start when I open the app", isOn: engine.$autoStartLiveActivity)
+                } footer: {
+                    Text("Turns on the CarPlay lyrics card automatically.")
                 }
                 Section {
                     Button("Log out of Spotify", role: .destructive) {
                         engine.stopLiveActivity()
                         auth.logOut()
                     }
+                } footer: {
+                    Text("Lyrics come from LRCLIB.")
                 }
             }
             .navigationTitle("Settings")
@@ -201,3 +256,4 @@ struct SettingsView: View {
         }
     }
 }
+
