@@ -54,9 +54,8 @@ struct LyricsActivityView: View {
                 .foregroundStyle(.white.opacity(0.6))
                 .lineLimit(1)
 
-            Text(state.currentLine)
+            CurrentLine(state: state)
                 .font(.system(.title3, weight: .bold))
-                .foregroundStyle(.white)
                 .lineLimit(3)
                 .minimumScaleFactor(0.6)
                 .contentTransition(.opacity)
@@ -91,9 +90,8 @@ struct LyricsActivityView: View {
                     .foregroundStyle(.white.opacity(0.3))
                     .lineLimit(1)
             }
-            Text(state.currentLine)
+            CurrentLine(state: state)
                 .font(.system(.title2, weight: .bold))
-                .foregroundStyle(.white)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
                 .contentTransition(.opacity)
@@ -106,6 +104,19 @@ struct LyricsActivityView: View {
             LineProgress(state: state).padding(.top, 2)
         }
         .padding(16)
+    }
+}
+
+/// The line being sung. In word-by-word mode the app sends how many words are lit.
+struct CurrentLine: View {
+    let state: LyricsActivityAttributes.ContentState
+
+    var body: some View {
+        if let lit = state.litWords {
+            Text(WordTiming.highlighted(state.currentLine, dim: 0.4) { $0 < lit ? 1 : 0 })
+        } else {
+            Text(state.currentLine).foregroundStyle(.white)
+        }
     }
 }
 

@@ -20,6 +20,8 @@ struct LyricsActivityAttributes: ActivityAttributes {
         var songEnd: Date
         /// Background color pulled from the album art, as "RRGGBB".
         var tintHex: String
+        /// In word-by-word mode, how many words of the current line are lit. nil means line mode.
+        var litWords: Int? = nil
 
         static let idle = ContentState(
             title: "Nothing playing", artist: "Play something on Spotify",

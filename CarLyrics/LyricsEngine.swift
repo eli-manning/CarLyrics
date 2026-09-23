@@ -24,6 +24,11 @@ final class LyricsEngine: ObservableObject {
         didSet { UserDefaults.standard.set(offsetMs, forKey: "offsetMs"); tick(force: true) }
     }
     @AppStorage("autoStartLiveActivity") var autoStartLiveActivity = true
+    /// Word timing is estimated, so line by line is the default.
+    @Published var wordByWord: Bool = UserDefaults.standard.bool(forKey: "wordByWord") {
+        didSet { UserDefaults.standard.set(wordByWord, forKey: "wordByWord"); tick(force: true) }
+    }
+    private var litWords: Int?
 
     let auth: SpotifyAuth
     private let activity = LiveActivityController()
@@ -149,11 +154,27 @@ final class LyricsEngine: ObservableObject {
     // MARK: Line tracking
 
     private func tick(force: Bool = false) {
-        let idx = lyrics?.index(at: position)
-        if idx != currentIndex || force {
+        let pos = position
+        let idx = lyrics?.index(at: pos)
+        let lit = idx.flatMap { litWordCount(line: $0, at: pos) }
+        if idx != currentIndex || lit != litWords || force {
             currentIndex = idx
+            litWords = lit
             if liveActivityOn { activity.update(activityState()) }
         }
+    }
+
+    /// Start and end of line `i`, in song seconds.
+    func lineBounds(_ i: Int) -> (start: TimeInterval, end: TimeInterval)? {
+        guard let lines = lyrics?.lines, lines.indices.contains(i) else { return nil }
+        let end = i + 1 < lines.count ? lines[i + 1].time : (track?.duration ?? lines[i].time + 5)
+        return (lines[i].time, end)
+    }
+
+    private func litWordCount(line i: Int, at pos: TimeInterval) -> Int? {
+        guard wordByWord, lyrics?.isSynced == true, let text = lyrics?.lines[i].text,
+              let bounds = lineBounds(i) else { return nil }
+        return WordTiming.starts(text, lineStart: bounds.start, lineEnd: bounds.end).filter { $0 <= pos }.count
     }
 
     private func activityState() -> LyricsActivityAttributes.ContentState {
@@ -193,7 +214,8 @@ final class LyricsEngine: ObservableObject {
             previousLine: previous, currentLine: current, nextLine: next,
             isPlaying: isPlaying, isSynced: lyrics?.isSynced ?? true,
             lineStart: lineStart, lineEnd: max(lineEnd, lineStart.addingTimeInterval(0.5)),
-            songStart: songStart, songEnd: songEnd, tintHex: tintHex
+            songStart: songStart, songEnd: songEnd, tintHex: tintHex,
+            litWords: status == .found && currentIndex != nil ? litWords : nil
         )
     }
 }

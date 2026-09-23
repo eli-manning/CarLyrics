@@ -191,8 +191,9 @@ struct LyricsScroller: View {
                     ForEach(engine.lyrics?.lines ?? []) { line in
                         let isCurrent = line.id == engine.currentIndex
                         Group {
-                            if isCurrent, engine.lyrics?.isSynced == true {
-                                KaraokeLine(line: line, end: lineEnd(after: line)) { engine.position }
+                            if isCurrent, engine.wordByWord, engine.lyrics?.isSynced == true,
+                               let bounds = engine.lineBounds(line.id) {
+                                KaraokeLine(text: line.text, start: bounds.start, end: bounds.end) { engine.position }
                             } else {
                                 Text(line.text)
                             }
@@ -213,11 +214,6 @@ struct LyricsScroller: View {
             }
             .onAppear { proxy.scrollTo(engine.currentIndex ?? 0, anchor: UnitPoint(x: 0, y: 0.35)) }
         }
-    }
-
-    private func lineEnd(after line: LyricLine) -> TimeInterval {
-        let lines = engine.lyrics?.lines ?? []
-        return line.id + 1 < lines.count ? lines[line.id + 1].time : (engine.track?.duration ?? line.time + 5)
     }
 
     private func message(_ text: String) -> some View {
@@ -249,6 +245,17 @@ struct SettingsView: View {
                     Text("If lyrics show up after the singer, slide right. Bluetooth audio usually runs a little behind.")
                 }
                 Section {
+                    Picker("Highlight", selection: $engine.wordByWord) {
+                        Text("Line by line").tag(false)
+                        Text("Word by word").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Highlight")
+                } footer: {
+                    Text("Lyrics only come with a time for each line. Word by word guesses when each word is sung, so it can drift on long notes or fast verses.")
+                }
+                Section {
                     Toggle("Start when I open the app", isOn: engine.$autoStartLiveActivity)
                 } footer: {
                     Text("Turns on the CarPlay lyrics card automatically.")
@@ -268,36 +275,19 @@ struct SettingsView: View {
     }
 }
 
-/// Lights up the current line word by word. LRCLIB only times whole lines, so each
-/// word's start is estimated from its share of the line's characters.
+/// Lights up the current line word by word using estimated word timing.
 struct KaraokeLine: View {
-    let line: LyricLine
+    let text: String
+    let start: TimeInterval
     let end: TimeInterval
     let position: () -> TimeInterval
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30)) { _ in
-            Text(highlighted(at: position()))
+            let pos = position()
+            let starts = WordTiming.starts(text, lineStart: start, lineEnd: end)
+            // Each word fades in over 0.15 s once its estimated start passes.
+            Text(WordTiming.highlighted(text, dim: 0.32) { min(max((pos - starts[$0]) / 0.15, 0), 1) })
         }
-    }
-
-    private func highlighted(at pos: TimeInterval) -> AttributedString {
-        let words = line.text.split(separator: " ")
-        let totalChars = Double(words.reduce(0) { $0 + $1.count + 1 })
-        // Singers rarely stretch a line across the whole gap before the next one,
-        // so cap the sung part at roughly 14 characters per second.
-        let sung = min(end - line.time, max(1.2, totalChars * 0.07))
-
-        var out = AttributedString()
-        var charsBefore = 0.0
-        for (i, word) in words.enumerated() {
-            let wordStart = line.time + sung * charsBefore / totalChars
-            let lit = min(max((pos - wordStart) / 0.15, 0), 1)
-            var piece = AttributedString(i == 0 ? String(word) : " " + word)
-            piece.foregroundColor = .white.opacity(0.32 + 0.68 * lit)
-            out += piece
-            charsBefore += Double(word.count + 1)
-        }
-        return out
     }
 }

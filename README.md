@@ -1,7 +1,7 @@
 # CarLyrics
 
 An iPhone app that shows synced lyrics for whatever you're playing on Spotify. In the app, the
-current line lights up word by word. On the Lock Screen and the CarPlay dashboard, a Live
+current line lights up, either all at once or word by word. On the Lock Screen and the CarPlay dashboard, a Live
 Activity card shows the line being sung and the one after it.
 
 I built it because the app I was using started charging for the real-time lyrics widget.
@@ -16,8 +16,10 @@ I built it because the app I was using started charging for the real-time lyrics
 - **Lyrics.** Lyrics come from [LRCLIB](https://lrclib.net), which is free and needs no API key.
   Most songs have timestamps for each line. If a song only has plain lyrics, the app spreads
   the lines evenly across the song and says the timing is a guess.
-- **Word by word.** LRCLIB times whole lines, not words, so the app estimates when each word
-  starts from how long the word is. It's close enough to sing along to.
+- **Line or word highlighting.** LRCLIB times whole lines, not words. By default the current
+  line lights up as a whole. Settings has a word-by-word mode that estimates when each word
+  starts from how long it is; it's close enough to sing along to but can drift on long notes.
+  The setting applies to the app and the CarPlay card.
 - **CarPlay.** iOS 26 shows Live Activities on the CarPlay dashboard when they support the
   `.small` activity family. That means this doesn't need Apple's CarPlay entitlement. The
   card's background color is sampled from the album art.
