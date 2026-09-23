@@ -5,15 +5,36 @@ Fallback for when Spotify's login page errors inside the app. Uses the
 http://127.0.0.1:8888/callback redirect already registered on the Spotify app.
 
     python3 tools/login_on_mac.py <device-udid>
+    python3 tools/login_on_mac.py --simulator <simulator-udid>
 """
 import base64, hashlib, http.server, json, os, secrets, subprocess, sys, tempfile, urllib.parse, webbrowser
 
-CLIENT_ID = "c74ded3599f44bdd9f7f187aab5a5beb"
+def read_config():
+    """Reads CARLYRICS_* values from Config.xcconfig (falling back to Base.xcconfig)."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    values = {}
+    for name in ("Base.xcconfig", "Config.xcconfig"):
+        path = os.path.join(root, name)
+        if not os.path.exists(path): continue
+        for line in open(path):
+            line = line.split("//")[0].strip()
+            if "=" in line and not line.startswith("#"):
+                key, value = (part.strip() for part in line.split("=", 1))
+                values[key] = value
+    return values
+
+config = read_config()
+CLIENT_ID = config.get("CARLYRICS_SPOTIFY_CLIENT_ID", "")
+BUNDLE_ID = config.get("CARLYRICS_BUNDLE_ID", "")
+if not CLIENT_ID or CLIENT_ID == "your_spotify_client_id":
+    sys.exit("Set CARLYRICS_SPOTIFY_CLIENT_ID in Config.xcconfig first (copy Config.example.xcconfig).")
 REDIRECT = "http://127.0.0.1:8888/callback"
 SCOPES = "user-read-currently-playing user-read-playback-state"
-BUNDLE_ID = "com.elimanning.carlyrics"
 
-device = sys.argv[1] if len(sys.argv) > 1 else sys.exit("usage: login_on_mac.py <device-udid>")
+args = sys.argv[1:]
+simulator = args[:1] == ["--simulator"]
+if simulator: args = args[1:]
+device = args[0] if args else sys.exit("usage: login_on_mac.py [--simulator] <udid>")
 verifier = secrets.token_urlsafe(64)[:64]
 challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
 auth_url = "https://accounts.spotify.com/authorize?" + urllib.parse.urlencode({
@@ -46,12 +67,21 @@ tokens = json.loads(subprocess.run(["curl", "-sS", "https://accounts.spotify.com
                                    check=True, capture_output=True, text=True).stdout)
 if "refresh_token" not in tokens: sys.exit(f"Token exchange failed: {tokens}")
 
-with tempfile.TemporaryDirectory() as d:
-    path = os.path.join(d, "spotify_import.json")
-    with open(path, "w") as f: json.dump({"refresh_token": tokens["refresh_token"]}, f)
-    subprocess.run(["xcrun", "devicectl", "device", "copy", "to", "--device", device, "--source", path,
-                    "--destination", "Documents/spotify_import.json", "--domain-type", "appDataContainer",
-                    "--domain-identifier", BUNDLE_ID], check=True, stdout=subprocess.DEVNULL)
-subprocess.run(["xcrun", "devicectl", "device", "process", "launch", "--terminate-existing", "--device", device, BUNDLE_ID],
-               check=True, stdout=subprocess.DEVNULL)
-print("Done — token copied to the phone and CarLyrics relaunched.")
+payload = json.dumps({"refresh_token": tokens["refresh_token"]})
+if simulator:
+    container = subprocess.run(["xcrun", "simctl", "get_app_container", device, BUNDLE_ID, "data"],
+                               check=True, capture_output=True, text=True).stdout.strip()
+    os.makedirs(os.path.join(container, "Documents"), exist_ok=True)
+    with open(os.path.join(container, "Documents", "spotify_import.json"), "w") as f: f.write(payload)
+    subprocess.run(["xcrun", "simctl", "launch", "--terminate-running-process", device, BUNDLE_ID],
+                   check=True, stdout=subprocess.DEVNULL)
+else:
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "spotify_import.json")
+        with open(path, "w") as f: f.write(payload)
+        subprocess.run(["xcrun", "devicectl", "device", "copy", "to", "--device", device, "--source", path,
+                        "--destination", "Documents/spotify_import.json", "--domain-type", "appDataContainer",
+                        "--domain-identifier", BUNDLE_ID], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["xcrun", "devicectl", "device", "process", "launch", "--terminate-existing", "--device", device, BUNDLE_ID],
+                   check=True, stdout=subprocess.DEVNULL)
+print("Done. Login copied over and CarLyrics relaunched.")

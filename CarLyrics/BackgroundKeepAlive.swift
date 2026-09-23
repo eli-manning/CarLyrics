@@ -24,26 +24,41 @@ final class BackgroundKeepAlive {
             // Phone calls / Siri interrupt us; resume afterwards.
             guard let self, self.isRunning,
                   let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
-                  AVAudioSession.InterruptionType(rawValue: raw) == .ended else { return }
-            try? self.startEngine()
+                  let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
+            Diagnostics.log("audio interruption \(type == .began ? "began" : "ended")")
+            if type == .ended { self.restart() }
         })
         observers.append(nc.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: .main) { [weak self] _ in
             guard let self, self.isRunning else { return }
-            try? self.startEngine()
+            Diagnostics.log("audio media services reset")
+            self.restart()
         })
         observers.append(nc.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main) { [weak self] _ in
             // Route changes (e.g. plugging into CarPlay) stop the engine.
             guard let self, self.isRunning else { return }
-            try? self.startEngine()
+            Diagnostics.log("audio route/config changed, engine running: \(self.engine.isRunning)")
+            self.restart()
         })
     }
 
     func start() {
         isRunning = true
-        do { try startEngine() } catch { print("KeepAlive failed: \(error)") }
+        restart()
     }
 
+    private func restart() {
+        do {
+            try startEngine()
+            Diagnostics.log("keep-alive audio running")
+        } catch {
+            Diagnostics.log("keep-alive audio failed: \(error.localizedDescription)")
+        }
+    }
+
+    var engineRunning: Bool { engine.isRunning }
+
     func stop() {
+        Diagnostics.log("keep-alive audio stopped")
         isRunning = false
         engine.stop()
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)

@@ -1,5 +1,6 @@
 import ActivityKit
 import Foundation
+import UIKit
 
 /// Owns the single lyrics Live Activity (Lock Screen, Dynamic Island, CarPlay dashboard).
 @MainActor
@@ -18,11 +19,17 @@ final class LiveActivityController {
             activity = Activity<LyricsActivityAttributes>.activities.first { $0.activityState == .active }
         }
         if activity != nil { update(state); return }
-        activity = try Activity.request(
-            attributes: LyricsActivityAttributes(),
-            content: ActivityContent(state: state, staleDate: nil),
-            pushType: nil
-        )
+        do {
+            activity = try Activity.request(
+                attributes: LyricsActivityAttributes(),
+                content: ActivityContent(state: state, staleDate: nil),
+                pushType: nil
+            )
+            Diagnostics.log("card started (app state \(UIApplication.shared.applicationState.rawValue))")
+        } catch {
+            Diagnostics.log("card start failed (app state \(UIApplication.shared.applicationState.rawValue)): \(error.localizedDescription)")
+            throw error
+        }
         lastState = state
     }
 
@@ -34,6 +41,7 @@ final class LiveActivityController {
 
     func end() {
         let all = Activity<LyricsActivityAttributes>.activities
+        if !all.isEmpty { Diagnostics.log("card ended") }
         activity = nil
         lastState = nil
         Task { for a in all { await a.end(nil, dismissalPolicy: .immediate) } }
