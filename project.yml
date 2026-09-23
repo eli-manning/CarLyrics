@@ -1,0 +1,64 @@
+name: CarLyrics
+options:
+  bundleIdPrefix: com.elimanning
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: 6K4VZU48G9
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  CarLyrics:
+    type: application
+    platform: iOS
+    sources:
+      - CarLyrics
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.elimanning.carlyrics
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: CarLyrics/Info.plist
+    info:
+      path: CarLyrics/Info.plist
+      properties:
+        CFBundleDisplayName: CarLyrics
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
+        UIBackgroundModes: [audio]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.elimanning.carlyrics
+            CFBundleURLSchemes: [carlyrics]
+    dependencies:
+      - target: CarLyricsWidget
+  CarLyricsWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - CarLyricsWidget
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.elimanning.carlyrics.widget
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: CarLyricsWidget/Info.plist
+    info:
+      path: CarLyricsWidget/Info.plist
+      properties:
+        CFBundleDisplayName: CarLyrics
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
