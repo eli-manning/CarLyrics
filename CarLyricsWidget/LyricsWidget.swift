@@ -53,15 +53,18 @@ struct LyricsWidgetView: View {
 
     var body: some View {
         content
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .containerBackground(for: .widget) {
                 Color(hex: entry.song?.tintHex ?? Color.defaultTintHex)
             }
     }
 
+    private var isSmall: Bool { family == .systemSmall }
+
     @ViewBuilder private var content: some View {
         if let song = entry.song {
-            VStack(alignment: .leading, spacing: 4) {
+            let line = current(in: song)
+            VStack(spacing: 6) {
                 HStack(spacing: 4) {
                     if !song.isPlaying { Image(systemName: "pause.fill") }
                     Text(song.title).lineLimit(1)
@@ -69,23 +72,32 @@ struct LyricsWidgetView: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
 
-                Text(current(in: song))
-                    .font(.system(family == .systemSmall ? .headline : .title3, weight: .bold))
-                    .foregroundStyle(.white)
-                    .lineLimit(family == .systemSmall ? 4 : 3)
-                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 0)
 
-                if let next = next(in: song) {
+                FittedLine(text: line, sizes: isSmall ? [24, 21, 18, 16, 14, 12] : [28, 24, 21, 18, 16, 14])
+                    .layoutPriority(1)
+
+                Spacer(minLength: 0)
+
+                // Only show what's next when the current line leaves room for it.
+                if let next = next(in: song), line.count <= (isSmall ? 48 : 90) {
                     Text(next)
-                        .font(.system(.caption, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.45))
-                        .lineLimit(family == .systemSmall ? 2 : 1)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             }
         } else {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(spacing: 6) {
                 Text("CarLyrics").font(.caption2.weight(.semibold)).foregroundStyle(.white.opacity(0.6))
-                Text("Play something on Spotify").font(.headline).foregroundStyle(.white)
+                Spacer(minLength: 0)
+                Text("Play something on Spotify")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                Spacer(minLength: 0)
             }
         }
     }
@@ -100,6 +112,29 @@ struct LyricsWidgetView: View {
         guard song.message == nil else { return nil }
         let i = (entry.index ?? -1) + 1
         return song.lines.indices.contains(i) ? song.lines[i].text : nil
+    }
+}
+
+/// Shows the whole line at the largest size that fits, instead of cutting it off.
+struct FittedLine: View {
+    let text: String
+    let sizes: [CGFloat]
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            ForEach(sizes, id: \.self) { size in
+                label(size).fixedSize(horizontal: false, vertical: true)
+            }
+            // Nothing fit completely: use the smallest size and let it trail off.
+            label(sizes.last ?? 12)
+        }
+    }
+
+    private func label(_ size: CGFloat) -> some View {
+        Text(text)
+            .font(.system(size: size, weight: .bold))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
     }
 }
 
