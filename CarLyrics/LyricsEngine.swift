@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import WidgetKit
 
 enum LyricsStatus: Equatable {
     case idle, loading, found, notFound, instrumental
@@ -21,7 +22,7 @@ final class LyricsEngine: ObservableObject {
 
     /// Positive = show lyrics earlier. Persisted.
     @Published var offsetMs: Double = UserDefaults.standard.double(forKey: "offsetMs") {
-        didSet { UserDefaults.standard.set(offsetMs, forKey: "offsetMs"); tick(force: true) }
+        didSet { UserDefaults.standard.set(offsetMs, forKey: "offsetMs"); tick(force: true); publishToWidget() }
     }
     @AppStorage("autoStartLiveActivity") var autoStartLiveActivity = true
     /// Word timing is estimated, so line by line is the default.
@@ -35,6 +36,10 @@ final class LyricsEngine: ObservableObject {
     private let hideCardAfter: TimeInterval = 30
     /// After this long with nothing playing, stop running in the background to save battery.
     private let sleepAfter: TimeInterval = 30 * 60
+    /// Set by the Start Lyrics shortcut: the card stays up through pauses until Stop Lyrics.
+    private var keepCardUp = false
+    private var lastWidgetSong: WidgetSong?
+    private var lastHeartbeat = Date.distantPast
 
     let auth: SpotifyAuth
     private let activity = LiveActivityController()
@@ -74,24 +79,29 @@ final class LyricsEngine: ObservableObject {
     }
 
     func appBecameActive() {
+        Diagnostics.log("app active")
         start()
         nextPoll = .distantPast
         if autoStartLiveActivity, auth.isLoggedIn, !liveActivityOn { startLiveActivity() }
     }
 
     func appEnteredBackground() {
+        Diagnostics.log("app backgrounded (card on: \(liveActivityOn))")
         // Without the lyrics card there's nothing to keep up to date, so let iOS suspend us.
         if !liveActivityOn { stop() }
     }
 
     // MARK: Live Activity
 
-    /// Turns on the lyrics card. It only appears while music is playing.
-    func startLiveActivity() {
+    /// Turns on the lyrics card. Normally it only appears while music is playing. With
+    /// `keepUp` (the Start Lyrics shortcut) it appears right away and stays until stopped,
+    /// because iOS only lets the app start a card from the background inside a shortcut.
+    func startLiveActivity(keepUp: Bool = false) {
         guard activity.areActivitiesEnabled else {
             errorMessage = "Live Activities are turned off for CarLyrics. You can turn them on in Settings > CarLyrics."
             return
         }
+        if keepUp { keepCardUp = true }
         liveActivityOn = true
         // Count from now, so the card has time to appear once a song starts.
         lastPlayingAt = Date()
@@ -102,6 +112,7 @@ final class LyricsEngine: ObservableObject {
     }
 
     func stopLiveActivity() {
+        keepCardUp = false
         activity.end()
         keepAlive.stop()
         liveActivityOn = false
@@ -111,13 +122,18 @@ final class LyricsEngine: ObservableObject {
     private func updateCardVisibility() {
         guard liveActivityOn else { return }
         let now = Date()
-        if isPlaying, track != nil {
+        if keepCardUp {
+            if !activity.isActive, now >= nextShowAttempt {
+                nextShowAttempt = now.addingTimeInterval(20)
+                try? activity.start(with: activityState())
+            }
+        } else if isPlaying, track != nil {
             lastPlayingAt = now
             // iOS may refuse to start a Live Activity while we're in the background,
             // so retry now and then instead of on every poll.
             if !activity.isActive, now >= nextShowAttempt {
                 nextShowAttempt = now.addingTimeInterval(20)
-                do { try activity.start(with: activityState()) } catch { print("Card start failed: \(error)") }
+                try? activity.start(with: activityState())
             }
         } else if activity.isActive, now.timeIntervalSince(lastPlayingAt) > hideCardAfter {
             activity.end()
@@ -141,6 +157,8 @@ final class LyricsEngine: ObservableObject {
             isPlaying = snap.isPlaying
             if snap.track != track { trackChanged(to: snap.track) }
             updateCardVisibility()
+            publishToWidget()
+            heartbeat()
             // Poll faster while playing so seeks/skips are picked up quickly.
             nextPoll = Date().addingTimeInterval(snap.isPlaying ? 2 : 5)
         } catch SpotifyAPIError.rateLimited(let wait) {
@@ -148,6 +166,7 @@ final class LyricsEngine: ObservableObject {
         } catch SpotifyAuthError.notLoggedIn {
             stopLiveActivity()
         } catch {
+            Diagnostics.log("poll failed: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
             nextPoll = Date().addingTimeInterval(5)
         }
@@ -168,6 +187,7 @@ final class LyricsEngine: ObservableObject {
                     self.tintHex = art.hex
                 }
                 self.tick(force: true)
+                self.publishToWidget()
             }
         }
         status = .loading
@@ -178,7 +198,48 @@ final class LyricsEngine: ObservableObject {
             self.lyrics = found
             self.status = found == nil ? .notFound : (found!.isInstrumental ? .instrumental : .found)
             self.tick(force: true)
+            self.publishToWidget()
         }
+    }
+
+    // MARK: Widget
+
+    /// Shares the song and its line timings with the widget, and reloads it when the song,
+    /// lyrics, play state, or position (a seek) changed. Reloads don't count against the
+    /// widget budget while the app has an active audio session.
+    private func publishToWidget() {
+        var song: WidgetSong?
+        if let track {
+            let message: String? = switch status {
+            case .loading: "Looking up lyrics…"
+            case .notFound: "Couldn't find lyrics for this one"
+            case .instrumental: "Instrumental"
+            case .idle, .found: nil
+            }
+            song = WidgetSong(
+                title: track.title, artist: track.artistLine, tintHex: tintHex,
+                songStart: Date().addingTimeInterval(-position), duration: track.duration,
+                isPlaying: isPlaying,
+                lines: (lyrics?.lines ?? []).map { .init(time: $0.time, text: $0.text) },
+                message: message
+            )
+        }
+        if let song, let last = lastWidgetSong, song.matches(last) { return }
+        if song == nil, lastWidgetSong == nil { return }
+        let songChanged = song?.title != lastWidgetSong?.title || song?.lines != lastWidgetSong?.lines
+        lastWidgetSong = song
+        SharedStore.save(song)
+        WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
+        if songChanged {
+            Diagnostics.log("widget updated: \(song?.title ?? "nothing playing"), \(song?.lines.count ?? 0) lines, readable: \(SharedStore.load() != nil)")
+        }
+    }
+
+    private func heartbeat() {
+        guard Date().timeIntervalSince(lastHeartbeat) > 60 else { return }
+        lastHeartbeat = Date()
+        let state = UIApplication.shared.applicationState == .background ? "background" : "foreground"
+        Diagnostics.log("alive (\(state)), playing: \(isPlaying), card: \(activity.isActive), line: \(currentIndex.map(String.init) ?? "-")")
     }
 
     // MARK: Line tracking

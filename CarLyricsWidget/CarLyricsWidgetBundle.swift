@@ -5,5 +5,6 @@ import WidgetKit
 struct CarLyricsWidgetBundle: WidgetBundle {
     var body: some Widget {
         LyricsLiveActivity()
+        LyricsWidget()
     }
 }
