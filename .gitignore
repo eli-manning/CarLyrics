@@ -2,3 +2,6 @@ build/
 DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Personal build settings (copy Config.example.xcconfig)
+Config.xcconfig

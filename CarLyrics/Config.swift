@@ -1,10 +1,12 @@
 import Foundation
 
+/// Per-person values come from Config.xcconfig through Info.plist, so nobody has to edit code.
 enum Config {
-    /// Spotify app from https://developer.spotify.com/dashboard (the same one the
-    /// ~/Code/Projects/Spotify scripts use). Its settings must list the redirect URI below.
-    static let spotifyClientID = "c74ded3599f44bdd9f7f187aab5a5beb"
+    static let spotifyClientID = Bundle.main.object(forInfoDictionaryKey: "SpotifyClientID") as? String ?? ""
+    static let bundleID = Bundle.main.bundleIdentifier ?? "carlyrics"
     static let redirectScheme = "carlyrics"
     static let redirectURI = "carlyrics://callback"
     static let scopes = "user-read-currently-playing user-read-playback-state"
+
+    static var isSpotifyConfigured: Bool { !spotifyClientID.isEmpty && spotifyClientID != "your_spotify_client_id" }
 }

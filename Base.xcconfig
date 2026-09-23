@@ -1,0 +1,8 @@
+// Build settings shared by every configuration. Don't put your own values here:
+// copy Config.example.xcconfig to Config.xcconfig and fill that in instead.
+
+CARLYRICS_TEAM_ID =
+CARLYRICS_BUNDLE_ID = com.example.carlyrics
+CARLYRICS_SPOTIFY_CLIENT_ID =
+
+#include? "Config.xcconfig"

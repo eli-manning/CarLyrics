@@ -1,0 +1,15 @@
+{
+  "originHash" : "2ac0c48d88c9054a4931540352ad908e7b25cc8c584933db730c1ca53ef41490",
+  "pins" : [
+    {
+      "identity" : "ios-auth",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/spotify/ios-auth.git",
+      "state" : {
+        "revision" : "1e92eb3ddd632a3ab3b2ed852057948f8ef05067",
+        "version" : "3.1.2"
+      }
+    }
+  ],
+  "version" : 3
+}

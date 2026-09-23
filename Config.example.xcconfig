@@ -1,0 +1,11 @@
+// Copy this file to Config.xcconfig (which git ignores) and fill in your own values.
+// Then run `xcodegen generate` and build. See the README for where each value comes from.
+
+// Your Apple developer team ID: Xcode > Settings > Accounts, or developer.apple.com/account.
+CARLYRICS_TEAM_ID = ABCDE12345
+
+// Any reverse-DNS ID you own. The widget gets "<this>.widget".
+CARLYRICS_BUNDLE_ID = com.yourname.carlyrics
+
+// Client ID of your app on developer.spotify.com/dashboard.
+CARLYRICS_SPOTIFY_CLIENT_ID = your_spotify_client_id
