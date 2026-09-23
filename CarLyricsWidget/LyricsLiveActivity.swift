@@ -2,40 +2,35 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-private let accent = Color(red: 1.0, green: 0.82, blue: 0.25)
-
 struct LyricsLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LyricsActivityAttributes.self) { context in
             LyricsActivityView(state: context.state)
-                .activityBackgroundTint(Color.black.opacity(0.85))
-                .activitySystemActionForegroundColor(accent)
+                .activityBackgroundTint(Color(hex: context.state.tintHex))
+                .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             let s = context.state
             return DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    Image(systemName: "music.mic").foregroundStyle(accent).padding(.leading, 4)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    Text(s.title).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(s.currentLine).font(.headline).foregroundStyle(accent).lineLimit(2)
-                        Text(s.nextLine).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                        LineProgress(state: s)
+                        Text(s.title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(s.currentLine).font(.headline).lineLimit(2)
+                        if !s.nextLine.isEmpty {
+                            Text(s.nextLine).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                        LineProgress(state: s).padding(.top, 2)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } compactLeading: {
-                Image(systemName: "music.mic").foregroundStyle(accent)
+                Image(systemName: "quote.bubble.fill")
             } compactTrailing: {
                 Text(s.currentLine).font(.caption2).lineLimit(1).frame(maxWidth: 64)
             } minimal: {
-                Image(systemName: "music.mic").foregroundStyle(accent)
+                Image(systemName: "quote.bubble.fill")
             }
         }
-        // .small is the size CarPlay (and Apple Watch Smart Stack) renders.
+        // .small is the size CarPlay (and the Apple Watch Smart Stack) uses.
         .supplementalActivityFamilies([.small])
     }
 }
@@ -51,83 +46,87 @@ struct LyricsActivityView: View {
         }
     }
 
-    /// CarPlay dashboard / Watch: big current line + the next one.
+    /// CarPlay dashboard: the line being sung, big, with the next one under it.
     private var carPlay: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Image(systemName: state.isPlaying ? "music.mic" : "pause.fill")
-                Text(state.title).lineLimit(1)
-            }
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 5) {
+            Text(state.title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.6))
+                .lineLimit(1)
 
             Text(state.currentLine)
-                .font(.system(.title3, design: .rounded, weight: .bold))
-                .foregroundStyle(accent)
+                .font(.system(.title3, weight: .bold))
+                .foregroundStyle(.white)
                 .lineLimit(3)
                 .minimumScaleFactor(0.6)
                 .contentTransition(.opacity)
 
             if !state.nextLine.isEmpty {
                 Text(state.nextLine)
-                    .font(.system(.footnote, design: .rounded, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.45))
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
             LineProgress(state: state)
         }
-        .padding(10)
+        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    /// Lock Screen / banner: previous, current, next lines karaoke-style.
+    /// Lock Screen: previous, current and next lines.
     private var lockScreen: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Image(systemName: "music.mic").foregroundStyle(accent)
+            HStack(spacing: 6) {
                 Text("\(state.title) · \(state.artist)").lineLimit(1)
                 Spacer()
-                if !state.isSynced { Image(systemName: "clock.badge.questionmark") }
                 if !state.isPlaying { Image(systemName: "pause.fill") }
             }
             .font(.caption.weight(.semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.white.opacity(0.6))
 
             if !state.previousLine.isEmpty {
-                Text(state.previousLine).font(.subheadline).foregroundStyle(.white.opacity(0.35)).lineLimit(1)
+                Text(state.previousLine)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.3))
+                    .lineLimit(1)
             }
             Text(state.currentLine)
-                .font(.system(.title2, design: .rounded, weight: .bold))
-                .foregroundStyle(accent)
+                .font(.system(.title2, weight: .bold))
+                .foregroundStyle(.white)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
                 .contentTransition(.opacity)
             if !state.nextLine.isEmpty {
-                Text(state.nextLine).font(.subheadline.weight(.medium)).foregroundStyle(.white.opacity(0.6)).lineLimit(1)
+                Text(state.nextLine)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.45))
+                    .lineLimit(1)
             }
-            LineProgress(state: state)
+            LineProgress(state: state).padding(.top, 2)
         }
         .padding(16)
     }
 }
 
-/// Animates on-device across the current line without needing updates.
+/// A thin bar that fills across the current line on its own, without app updates.
 struct LineProgress: View {
     let state: LyricsActivityAttributes.ContentState
 
     var body: some View {
-        if state.isPlaying, state.lineEnd > state.lineStart {
-            ProgressView(timerInterval: state.lineStart...state.lineEnd, countsDown: false) {
-                EmptyView()
-            } currentValueLabel: {
-                EmptyView()
+        Group {
+            if state.isPlaying, state.lineEnd > state.lineStart {
+                ProgressView(timerInterval: state.lineStart...state.lineEnd, countsDown: false) {
+                    EmptyView()
+                } currentValueLabel: {
+                    EmptyView()
+                }
+            } else {
+                ProgressView(value: 0)
             }
-            .progressViewStyle(.linear)
-            .tint(accent)
-            .labelsHidden()
-        } else {
-            ProgressView(value: 0).progressViewStyle(.linear).tint(accent).opacity(0.3)
         }
+        .progressViewStyle(.linear)
+        .tint(.white.opacity(0.85))
+        .labelsHidden()
     }
 }

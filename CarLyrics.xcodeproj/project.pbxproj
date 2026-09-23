@@ -16,6 +16,7 @@
 		7E240AB4DACF0B940AEDC53E /* CarLyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5210E13650B295ADF15BE701 /* CarLyricsApp.swift */; };
 		8D3EDD0EA732404C87312DFB /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C3A0C61B15A3ACD6225B11 /* SpotifyAPI.swift */; };
 		8D42C86FCC71BC9BC645FA10 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEE377E6DBFAC838B0B39A9 /* Config.swift */; };
+		9CFC7C8F532DADEED4239438 /* ArtworkPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */; };
 		B69B7CC1837981E0BB1A645D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AEEE32790827C71F7BCD9F31 /* Assets.xcassets */; };
 		C0E521FB329335673913B7D0 /* BackgroundKeepAlive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */; };
 		C7FB7FF80F79F6DE148E48E8 /* LyricsLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134372745DA0313D83BF4580 /* LyricsLiveActivity.swift */; };
@@ -59,6 +60,7 @@
 		633174D43C6C3F7F18E6E179 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundKeepAlive.swift; sourceTree = "<group>"; };
 		7CEE377E6DBFAC838B0B39A9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPalette.swift; sourceTree = "<group>"; };
 		9B894422A2B6FC864DBA7EE1 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		AEEE32790827C71F7BCD9F31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BF89F5421F1CC4DC43C549BE /* SpotifyAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAuth.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 		D370F5B791B8BDF754532EA7 /* CarLyrics */ = {
 			isa = PBXGroup;
 			children = (
+				83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */,
 				AEEE32790827C71F7BCD9F31 /* Assets.xcassets */,
 				6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */,
 				5210E13650B295ADF15BE701 /* CarLyricsApp.swift */,
@@ -219,6 +222,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9CFC7C8F532DADEED4239438 /* ArtworkPalette.swift in Sources */,
 				C0E521FB329335673913B7D0 /* BackgroundKeepAlive.swift in Sources */,
 				7E240AB4DACF0B940AEDC53E /* CarLyricsApp.swift in Sources */,
 				8D42C86FCC71BC9BC645FA10 /* Config.swift in Sources */,

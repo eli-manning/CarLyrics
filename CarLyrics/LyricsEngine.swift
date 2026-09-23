@@ -16,6 +16,8 @@ final class LyricsEngine: ObservableObject {
     @Published private(set) var currentIndex: Int?
     @Published private(set) var liveActivityOn = false
     @Published var errorMessage: String?
+    @Published private(set) var artwork: UIImage?
+    @Published private(set) var tintHex = Color.defaultTintHex
 
     /// Positive = show lyrics earlier. Persisted.
     @Published var offsetMs: Double = UserDefaults.standard.double(forKey: "offsetMs") {
@@ -30,6 +32,7 @@ final class LyricsEngine: ObservableObject {
     private var loop: Task<Void, Never>?
     private var nextPoll = Date.distantPast
     private var lyricsTask: Task<Void, Never>?
+    private var artworkTask: Task<Void, Never>?
 
     init(auth: SpotifyAuth) { self.auth = auth }
 
@@ -120,7 +123,18 @@ final class LyricsEngine: ObservableObject {
         lyrics = nil
         currentIndex = nil
         lyricsTask?.cancel()
+        artworkTask?.cancel()
         guard let newTrack else { status = .idle; tick(force: true); return }
+        if let url = newTrack.artworkURL {
+            artworkTask = Task {
+                guard let art = await ArtworkPalette.load(url), !Task.isCancelled, newTrack == self.track else { return }
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    self.artwork = art.image
+                    self.tintHex = art.hex
+                }
+                self.tick(force: true)
+            }
+        }
         status = .loading
         tick(force: true)
         lyricsTask = Task {
@@ -179,7 +193,7 @@ final class LyricsEngine: ObservableObject {
             previousLine: previous, currentLine: current, nextLine: next,
             isPlaying: isPlaying, isSynced: lyrics?.isSynced ?? true,
             lineStart: lineStart, lineEnd: max(lineEnd, lineStart.addingTimeInterval(0.5)),
-            songStart: songStart, songEnd: songEnd
+            songStart: songStart, songEnd: songEnd, tintHex: tintHex
         )
     }
 }
