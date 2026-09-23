@@ -19,24 +19,75 @@ struct LyricsProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<LyricsEntry>) -> Void) {
-        let now = Date()
-        guard let song = SharedStore.load() else {
-            return completion(Timeline(entries: [LyricsEntry(date: now, song: nil, index: nil)], policy: .never))
+        Task {
+            let now = Date()
+            var song = SharedStore.load()
+            var lookedUp = false
+            // Use what the app shared while it still describes a song that's playing now.
+            // Otherwise (the app isn't running, or the song ended) look it up ourselves.
+            if song == nil || !song!.isPlaying || song!.songEnd <= now {
+                if let fetched = await WidgetLookup.currentSong(previous: song) {
+                    song = fetched.song
+                    SharedStore.save(fetched.song)
+                    lookedUp = true
+                }
+            }
+            completion(Self.timeline(for: song, now: now, lookedUp: lookedUp))
+        }
+    }
+
+    /// Widget refreshes are rationed (roughly 40 to 70 a day), so the widget only checks on
+    /// its own when a song should be over, or every few minutes while nothing plays. While
+    /// the app runs, it refreshes the widget right away on skips and pauses.
+    private static func timeline(for song: WidgetSong?, now: Date, lookedUp: Bool) -> Timeline<LyricsEntry> {
+        guard let song else {
+            return Timeline(entries: [LyricsEntry(date: now, song: nil, index: nil)],
+                            policy: .after(now.addingTimeInterval(lookedUp ? 300 : 120)))
         }
         var entries = [LyricsEntry(date: now, song: song, index: song.index(at: now))]
-        guard song.isPlaying, !song.lines.isEmpty, song.songEnd > now else {
-            // If the app's next update gets dropped, check again on our own once this song
-            // should be over (not sooner: widget refreshes are rationed).
-            let policy: TimelineReloadPolicy = song.isPlaying
-                ? .after(max(song.songEnd, now.addingTimeInterval(15))) : .never
-            return completion(Timeline(entries: entries, policy: policy))
+        guard song.isPlaying, song.songEnd > now else {
+            return Timeline(entries: entries, policy: .after(now.addingTimeInterval(300)))
         }
         for (i, line) in song.lines.enumerated() {
             let date = song.songStart.addingTimeInterval(line.time)
             if date > now, date < song.songEnd { entries.append(LyricsEntry(date: date, song: song, index: i)) }
         }
-        // The app reloads this when the next song starts; this is only a fallback.
-        completion(Timeline(entries: entries, policy: .after(song.songEnd)))
+        return Timeline(entries: entries, policy: .after(song.songEnd.addingTimeInterval(2)))
+    }
+}
+
+/// Looks up what's playing and its lyrics directly, for when the app isn't running.
+enum WidgetLookup {
+    struct Result { let song: WidgetSong? }
+
+    /// nil means the lookup failed (no login, no network); `Result(song: nil)` means
+    /// nothing is playing.
+    static func currentSong(previous: WidgetSong?) async -> Result? {
+        guard let snap = try? await SpotifyAPI.currentlyPlaying(token: { force in
+            try await SpotifyTokenStore.accessToken(forceRefresh: force, canLogOut: false)
+        }) else { return nil }
+        guard let track = snap.track else { return Result(song: nil) }
+
+        let lyrics = await LyricsService.lyrics(for: track)
+        var tint = Color.defaultTintHex
+        if previous?.title == track.title, let old = previous?.tintHex {
+            tint = old
+        } else if let url = track.artworkURL, let art = await ArtworkPalette.load(url) {
+            tint = art.hex
+        }
+        let offset = previous?.offsetMs ?? 0
+        let position = Double(snap.progressMs) / 1000
+            + (snap.isPlaying ? Date().timeIntervalSince(snap.capturedAt) : 0) + offset / 1000
+        let message: String? = if lyrics == nil { "Couldn't find lyrics for this one" }
+            else if lyrics!.isInstrumental { "Instrumental" } else { nil }
+
+        return Result(song: WidgetSong(
+            title: track.title, artist: track.artistLine, tintHex: tint,
+            songStart: Date().addingTimeInterval(-position), duration: track.duration,
+            isPlaying: snap.isPlaying,
+            lines: (lyrics?.lines ?? []).map { .init(time: $0.time, text: $0.text) },
+            message: message, offsetMs: offset
+        ))
     }
 }
 

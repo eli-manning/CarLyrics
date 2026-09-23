@@ -152,7 +152,7 @@ final class LyricsEngine: ObservableObject {
     private func poll() async {
         guard auth.isLoggedIn else { nextPoll = Date().addingTimeInterval(2); return }
         do {
-            let snap = try await SpotifyAPI.currentlyPlaying(auth: auth)
+            let snap = try await SpotifyAPI.currentlyPlaying { [auth] force in try await auth.accessToken(forceRefresh: force) }
             errorMessage = nil
             snapshot = snap
             isPlaying = snap.isPlaying
@@ -225,7 +225,8 @@ final class LyricsEngine: ObservableObject {
                 songStart: Date().addingTimeInterval(-position), duration: track.duration,
                 isPlaying: isPlaying,
                 lines: (lyrics?.lines ?? []).map { .init(time: $0.time, text: $0.text) },
-                message: message
+                message: message,
+                offsetMs: offsetMs
             )
         }
         if let song, let last = lastWidgetSong, song.matches(last) { return }

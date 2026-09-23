@@ -31,11 +31,12 @@ enum SpotifyAPIError: LocalizedError {
 }
 
 enum SpotifyAPI {
-    static func currentlyPlaying(auth: SpotifyAuth) async throws -> PlaybackSnapshot {
+    /// `token(forceRefresh)` supplies an access token; a 401 retries once with a fresh one.
+    static func currentlyPlaying(token: (Bool) async throws -> String) async throws -> PlaybackSnapshot {
         do {
-            return try await fetch(token: try await auth.accessToken())
+            return try await fetch(token: try await token(false))
         } catch SpotifyAPIError.http(401) {
-            return try await fetch(token: try await auth.accessToken(forceRefresh: true))
+            return try await fetch(token: try await token(true))
         }
     }
 

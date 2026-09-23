@@ -8,23 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		0A91755499706FF76EEFDA88 /* WordTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418CAB7CBA3CC98B2440667D /* WordTiming.swift */; };
+		0C64DAECC37CE0F9EE6F4F84 /* SpotifyTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF245A612F68E00B52785D5 /* SpotifyTokenStore.swift */; };
 		10A74E33213A9D7C01D092EC /* WidgetSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CB50D44404E124001B0952 /* WidgetSong.swift */; };
 		15EFDDE3CDDB06FDEF514B2D /* SpotifyAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF89F5421F1CC4DC43C549BE /* SpotifyAuth.swift */; };
 		162E96B607E68A61E5DCC820 /* CarLyricsWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 17D2130A95163B57C8724D44 /* CarLyricsWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1925E0C50DEA47AFFBF1F1CB /* LyricsActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */; };
 		2C4B07E0C1CDDBB51B1DBF30 /* CarLyricsWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1068EACD9720B9AC7FB1BF /* CarLyricsWidgetBundle.swift */; };
-		321E6FCA5DE4FF92D899A6D3 /* LyricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CCEB755E68A9BF7F7A4755 /* LyricsService.swift */; };
+		30237C7D0A2277E00D491CA7 /* ArtworkPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */; };
+		36F7B9C3B574CB99C0DDF98C /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */; };
 		447748D977C7480E0EB3EC97 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52814CA5EC27BF297C76F4A /* Diagnostics.swift */; };
 		45810DE482EC4A871C752748 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC24411FCA4EBF931207891E /* AppModel.swift */; };
 		5B1985B51B2BE4CDA5A12651 /* LyricsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686849A770E6F70C8F1568A6 /* LyricsWidget.swift */; };
 		5E62B4F56475412BFA654984 /* WidgetSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CB50D44404E124001B0952 /* WidgetSong.swift */; };
+		660E9B6657A15F1F9DFB1C8D /* SpotifyTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF245A612F68E00B52785D5 /* SpotifyTokenStore.swift */; };
 		671AD61365DE6F68071A33C8 /* LyricsActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */; };
 		6F60CFCE14A6A068000CB537 /* LyricsIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D369E5D54F0FD40142FE3927 /* LyricsIntents.swift */; };
 		7E240AB4DACF0B940AEDC53E /* CarLyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5210E13650B295ADF15BE701 /* CarLyricsApp.swift */; };
-		8D3EDD0EA732404C87312DFB /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C3A0C61B15A3ACD6225B11 /* SpotifyAPI.swift */; };
+		851AB2B517833806234FDED0 /* ArtworkPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */; };
+		8850CE2BE225FC73052A537C /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */; };
 		8D42C86FCC71BC9BC645FA10 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEE377E6DBFAC838B0B39A9 /* Config.swift */; };
-		9CFC7C8F532DADEED4239438 /* ArtworkPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */; };
 		9FD1B665BFA731DCE91DED11 /* WordTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418CAB7CBA3CC98B2440667D /* WordTiming.swift */; };
+		A1AE24D265E2326AB60145AC /* LyricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8BE70CF00CE1FBAD9D9B15 /* LyricsService.swift */; };
+		B5C67960337B68C041952568 /* LyricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8BE70CF00CE1FBAD9D9B15 /* LyricsService.swift */; };
 		B69B7CC1837981E0BB1A645D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AEEE32790827C71F7BCD9F31 /* Assets.xcassets */; };
 		C0E521FB329335673913B7D0 /* BackgroundKeepAlive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */; };
 		C22F7BA586B97B31DE5D2701 /* SpotifyLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2777BA39026F4F8D7099888B /* SpotifyLogin */; };
@@ -59,25 +64,26 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAPI.swift; sourceTree = "<group>"; };
+		0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPalette.swift; sourceTree = "<group>"; };
 		134372745DA0313D83BF4580 /* LyricsLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsLiveActivity.swift; sourceTree = "<group>"; };
-		16C3A0C61B15A3ACD6225B11 /* SpotifyAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAPI.swift; sourceTree = "<group>"; };
 		17D2130A95163B57C8724D44 /* CarLyricsWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CarLyricsWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		30CCEB755E68A9BF7F7A4755 /* LyricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsService.swift; sourceTree = "<group>"; };
 		418CAB7CBA3CC98B2440667D /* WordTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordTiming.swift; sourceTree = "<group>"; };
 		48F33C0E47A57B894FD2941A /* LyricsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsEngine.swift; sourceTree = "<group>"; };
 		5210E13650B295ADF15BE701 /* CarLyricsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarLyricsApp.swift; sourceTree = "<group>"; };
 		5A1068EACD9720B9AC7FB1BF /* CarLyricsWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarLyricsWidgetBundle.swift; sourceTree = "<group>"; };
+		5FF245A612F68E00B52785D5 /* SpotifyTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyTokenStore.swift; sourceTree = "<group>"; };
 		633174D43C6C3F7F18E6E179 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundKeepAlive.swift; sourceTree = "<group>"; };
 		686849A770E6F70C8F1568A6 /* LyricsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsWidget.swift; sourceTree = "<group>"; };
 		6D63B7C0B74F1C62F11C695C /* CarLyrics.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CarLyrics.entitlements; sourceTree = "<group>"; };
 		72CB50D44404E124001B0952 /* WidgetSong.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSong.swift; sourceTree = "<group>"; };
 		7CEE377E6DBFAC838B0B39A9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
-		83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPalette.swift; sourceTree = "<group>"; };
 		9B894422A2B6FC864DBA7EE1 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		AEEE32790827C71F7BCD9F31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B52814CA5EC27BF297C76F4A /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
 		BF89F5421F1CC4DC43C549BE /* SpotifyAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAuth.swift; sourceTree = "<group>"; };
+		CF8BE70CF00CE1FBAD9D9B15 /* LyricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsService.swift; sourceTree = "<group>"; };
 		D369E5D54F0FD40142FE3927 /* LyricsIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsIntents.swift; sourceTree = "<group>"; };
 		D89DCF7CF7F6B3C59C2AAB1A /* CarLyricsWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CarLyricsWidget.entitlements; sourceTree = "<group>"; };
 		D8A2D349CEE851838835FFFB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -85,7 +91,7 @@
 		E0972B9E8C8EB3C5E1A186B5 /* LiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityController.swift; sourceTree = "<group>"; };
 		E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsActivityAttributes.swift; sourceTree = "<group>"; };
 		EC24411FCA4EBF931207891E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		"TEMP_7181EC9B-BCBF-4FFD-8F98-1BB88CA15841" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		"TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,7 +132,6 @@
 			isa = PBXGroup;
 			children = (
 				EC24411FCA4EBF931207891E /* AppModel.swift */,
-				83B62DE3F2FA7F252478A76F /* ArtworkPalette.swift */,
 				AEEE32790827C71F7BCD9F31 /* Assets.xcassets */,
 				6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */,
 				6D63B7C0B74F1C62F11C695C /* CarLyrics.entitlements */,
@@ -137,8 +142,6 @@
 				E0972B9E8C8EB3C5E1A186B5 /* LiveActivityController.swift */,
 				48F33C0E47A57B894FD2941A /* LyricsEngine.swift */,
 				D369E5D54F0FD40142FE3927 /* LyricsIntents.swift */,
-				30CCEB755E68A9BF7F7A4755 /* LyricsService.swift */,
-				16C3A0C61B15A3ACD6225B11 /* SpotifyAPI.swift */,
 				BF89F5421F1CC4DC43C549BE /* SpotifyAuth.swift */,
 				9B894422A2B6FC864DBA7EE1 /* Views.swift */,
 			);
@@ -157,17 +160,21 @@
 		F5980B3DF8D24741BCFFED0C /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */,
 				E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */,
+				CF8BE70CF00CE1FBAD9D9B15 /* LyricsService.swift */,
+				0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */,
+				5FF245A612F68E00B52785D5 /* SpotifyTokenStore.swift */,
 				72CB50D44404E124001B0952 /* WidgetSong.swift */,
 				418CAB7CBA3CC98B2440667D /* WordTiming.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		"TEMP_4B44A9A4-8082-4492-8131-074D5A214D0F" /* CarLyrics */ = {
+		"TEMP_07070574-1A7F-4395-B9B1-B14C9A523C01" /* CarLyrics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_7181EC9B-BCBF-4FFD-8F98-1BB88CA15841" /* Base.xcconfig */,
+				"TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */,
 			);
 			path = CarLyrics;
 			sourceTree = "<group>";
@@ -273,7 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				45810DE482EC4A871C752748 /* AppModel.swift in Sources */,
-				9CFC7C8F532DADEED4239438 /* ArtworkPalette.swift in Sources */,
+				30237C7D0A2277E00D491CA7 /* ArtworkPalette.swift in Sources */,
 				C0E521FB329335673913B7D0 /* BackgroundKeepAlive.swift in Sources */,
 				7E240AB4DACF0B940AEDC53E /* CarLyricsApp.swift in Sources */,
 				8D42C86FCC71BC9BC645FA10 /* Config.swift in Sources */,
@@ -282,9 +289,10 @@
 				1925E0C50DEA47AFFBF1F1CB /* LyricsActivityAttributes.swift in Sources */,
 				E2130C2E756B6D1A265F84D9 /* LyricsEngine.swift in Sources */,
 				6F60CFCE14A6A068000CB537 /* LyricsIntents.swift in Sources */,
-				321E6FCA5DE4FF92D899A6D3 /* LyricsService.swift in Sources */,
-				8D3EDD0EA732404C87312DFB /* SpotifyAPI.swift in Sources */,
+				B5C67960337B68C041952568 /* LyricsService.swift in Sources */,
+				36F7B9C3B574CB99C0DDF98C /* SpotifyAPI.swift in Sources */,
 				15EFDDE3CDDB06FDEF514B2D /* SpotifyAuth.swift in Sources */,
+				660E9B6657A15F1F9DFB1C8D /* SpotifyTokenStore.swift in Sources */,
 				F4ED3F9D5C67F89D2FC59988 /* Views.swift in Sources */,
 				10A74E33213A9D7C01D092EC /* WidgetSong.swift in Sources */,
 				0A91755499706FF76EEFDA88 /* WordTiming.swift in Sources */,
@@ -295,10 +303,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				851AB2B517833806234FDED0 /* ArtworkPalette.swift in Sources */,
 				2C4B07E0C1CDDBB51B1DBF30 /* CarLyricsWidgetBundle.swift in Sources */,
 				671AD61365DE6F68071A33C8 /* LyricsActivityAttributes.swift in Sources */,
 				C7FB7FF80F79F6DE148E48E8 /* LyricsLiveActivity.swift in Sources */,
+				A1AE24D265E2326AB60145AC /* LyricsService.swift in Sources */,
 				5B1985B51B2BE4CDA5A12651 /* LyricsWidget.swift in Sources */,
+				8850CE2BE225FC73052A537C /* SpotifyAPI.swift in Sources */,
+				0C64DAECC37CE0F9EE6F4F84 /* SpotifyTokenStore.swift in Sources */,
 				5E62B4F56475412BFA654984 /* WidgetSong.swift in Sources */,
 				9FD1B665BFA731DCE91DED11 /* WordTiming.swift in Sources */,
 			);
@@ -317,7 +329,7 @@
 /* Begin XCBuildConfiguration section */
 		23CB6163D1568275BF42DECE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_7181EC9B-BCBF-4FFD-8F98-1BB88CA15841" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -431,7 +443,7 @@
 		};
 		B661031D5EB55CE710244241 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_7181EC9B-BCBF-4FFD-8F98-1BB88CA15841" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

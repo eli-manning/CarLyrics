@@ -20,6 +20,8 @@ struct WidgetSong: Codable, Equatable {
     var lines: [Line]
     /// Shown instead of lyrics when there aren't any ("Couldn't find lyrics…").
     var message: String?
+    /// The user's timing offset, so the widget can apply it when it looks songs up itself.
+    var offsetMs: Double = 0
 
     var songEnd: Date { songStart.addingTimeInterval(duration) }
 

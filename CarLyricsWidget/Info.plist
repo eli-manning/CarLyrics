@@ -27,5 +27,7 @@
 	</dict>
 	<key>SharedKeychainGroup</key>
 	<string>$(AppIdentifierPrefix)$(CARLYRICS_BUNDLE_ID).shared</string>
+	<key>SpotifyClientID</key>
+	<string>$(CARLYRICS_SPOTIFY_CLIENT_ID)</string>
 </dict>
 </plist>
