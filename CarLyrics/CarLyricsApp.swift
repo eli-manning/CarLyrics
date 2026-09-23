@@ -2,15 +2,9 @@ import SwiftUI
 
 @main
 struct CarLyricsApp: App {
-    @StateObject private var auth: SpotifyAuth
-    @StateObject private var engine: LyricsEngine
+    @ObservedObject private var auth = AppModel.auth
+    @ObservedObject private var engine = AppModel.engine
     @Environment(\.scenePhase) private var scenePhase
-
-    init() {
-        let auth = SpotifyAuth()
-        _auth = StateObject(wrappedValue: auth)
-        _engine = StateObject(wrappedValue: LyricsEngine(auth: auth))
-    }
 
     var body: some Scene {
         WindowGroup {
@@ -24,6 +18,7 @@ struct CarLyricsApp: App {
             .environmentObject(auth)
             .environmentObject(engine)
             .preferredColorScheme(.dark)
+            .onOpenURL { auth.handle($0) }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
