@@ -4,7 +4,8 @@ import Foundation
 /// Owns the single lyrics Live Activity (Lock Screen, Dynamic Island, CarPlay dashboard).
 @MainActor
 final class LiveActivityController {
-    private var activity: Activity<LyricsActivityAttributes>?
+    /// Picks up a card left over from a previous launch, so it can be updated or hidden.
+    private var activity = Activity<LyricsActivityAttributes>.activities.first { $0.activityState == .active }
     private var lastState: LyricsActivityAttributes.ContentState?
 
     var isActive: Bool { activity?.activityState == .active }

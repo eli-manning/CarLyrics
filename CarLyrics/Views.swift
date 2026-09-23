@@ -150,7 +150,7 @@ struct NowPlayingView: View {
             )) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Show in CarPlay").font(.system(size: 15, weight: .semibold))
-                    Text("Also appears on your Lock Screen")
+                    Text("Also on your Lock Screen, only while music is playing")
                         .font(.system(size: 13))
                         .foregroundStyle(.white.opacity(0.6))
                 }

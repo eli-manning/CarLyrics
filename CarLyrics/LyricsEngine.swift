@@ -29,6 +29,12 @@ final class LyricsEngine: ObservableObject {
         didSet { UserDefaults.standard.set(wordByWord, forKey: "wordByWord"); tick(force: true) }
     }
     private var litWords: Int?
+    /// Last time Spotify reported something playing; the card hides after a quiet stretch.
+    private var lastPlayingAt = Date.distantPast
+    private var nextShowAttempt = Date.distantPast
+    private let hideCardAfter: TimeInterval = 30
+    /// After this long with nothing playing, stop running in the background to save battery.
+    private let sleepAfter: TimeInterval = 30 * 60
 
     let auth: SpotifyAuth
     private let activity = LiveActivityController()
@@ -74,31 +80,54 @@ final class LyricsEngine: ObservableObject {
     }
 
     func appEnteredBackground() {
-        // Without a Live Activity there's nothing to keep up to date — let iOS suspend us.
+        // Without the lyrics card there's nothing to keep up to date, so let iOS suspend us.
         if !liveActivityOn { stop() }
     }
 
     // MARK: Live Activity
 
+    /// Turns on the lyrics card. It only appears while music is playing.
     func startLiveActivity() {
         guard activity.areActivitiesEnabled else {
             errorMessage = "Live Activities are turned off for CarLyrics. You can turn them on in Settings > CarLyrics."
             return
         }
-        do {
-            try activity.start(with: activityState())
-            keepAlive.start()
-            liveActivityOn = true
-            start()
-        } catch {
-            errorMessage = "Couldn't start the lyrics card. \(error.localizedDescription)"
-        }
+        liveActivityOn = true
+        // Count from now, so the card has time to appear once a song starts.
+        lastPlayingAt = Date()
+        nextShowAttempt = .distantPast
+        keepAlive.start()
+        start()
+        updateCardVisibility()
     }
 
     func stopLiveActivity() {
         activity.end()
         keepAlive.stop()
         liveActivityOn = false
+    }
+
+    /// Shows the card while music plays and hides it after a quiet stretch.
+    private func updateCardVisibility() {
+        guard liveActivityOn else { return }
+        let now = Date()
+        if isPlaying, track != nil {
+            lastPlayingAt = now
+            // iOS may refuse to start a Live Activity while we're in the background,
+            // so retry now and then instead of on every poll.
+            if !activity.isActive, now >= nextShowAttempt {
+                nextShowAttempt = now.addingTimeInterval(20)
+                do { try activity.start(with: activityState()) } catch { print("Card start failed: \(error)") }
+            }
+        } else if activity.isActive, now.timeIntervalSince(lastPlayingAt) > hideCardAfter {
+            activity.end()
+        } else if !activity.isActive, now.timeIntervalSince(lastPlayingAt) > sleepAfter,
+                  UIApplication.shared.applicationState == .background {
+            // Nothing has played for a long time. Stop the background work; opening
+            // the app turns it back on.
+            stopLiveActivity()
+            stop()
+        }
     }
 
     // MARK: Polling
@@ -111,6 +140,7 @@ final class LyricsEngine: ObservableObject {
             snapshot = snap
             isPlaying = snap.isPlaying
             if snap.track != track { trackChanged(to: snap.track) }
+            updateCardVisibility()
             // Poll faster while playing so seeks/skips are picked up quickly.
             nextPoll = Date().addingTimeInterval(snap.isPlaying ? 2 : 5)
         } catch SpotifyAPIError.rateLimited(let wait) {
@@ -160,7 +190,7 @@ final class LyricsEngine: ObservableObject {
         if idx != currentIndex || lit != litWords || force {
             currentIndex = idx
             litWords = lit
-            if liveActivityOn { activity.update(activityState()) }
+            if activity.isActive { activity.update(activityState()) }
         }
     }
 
