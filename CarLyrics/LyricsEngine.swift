@@ -39,6 +39,7 @@ final class LyricsEngine: ObservableObject {
     /// Set by the Start Lyrics shortcut: the card stays up through pauses until Stop Lyrics.
     private var keepCardUp = false
     private var lastWidgetSong: WidgetSong?
+    private var widgetReloadTask: Task<Void, Never>?
     private var lastHeartbeat = Date.distantPast
 
     let auth: SpotifyAuth
@@ -208,6 +209,9 @@ final class LyricsEngine: ObservableObject {
     /// lyrics, play state, or position (a seek) changed. Reloads don't count against the
     /// widget budget while the app has an active audio session.
     private func publishToWidget() {
+        // iOS drops widget reloads that come too close together, so don't send the brief
+        // "looking up lyrics" state; wait for the lyrics themselves.
+        guard status != .loading else { return }
         var song: WidgetSong?
         if let track {
             let message: String? = switch status {
@@ -229,7 +233,13 @@ final class LyricsEngine: ObservableObject {
         let songChanged = song?.title != lastWidgetSong?.title || song?.lines != lastWidgetSong?.lines
         lastWidgetSong = song
         SharedStore.save(song)
-        WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
+        // Coalesce bursts (new song, then artwork color, then a seek) into one reload.
+        widgetReloadTask?.cancel()
+        widgetReloadTask = Task {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
+        }
         if songChanged {
             Diagnostics.log("widget updated: \(song?.title ?? "nothing playing"), \(song?.lines.count ?? 0) lines, readable: \(SharedStore.load() != nil)")
         }

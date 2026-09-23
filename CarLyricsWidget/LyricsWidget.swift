@@ -25,7 +25,11 @@ struct LyricsProvider: TimelineProvider {
         }
         var entries = [LyricsEntry(date: now, song: song, index: song.index(at: now))]
         guard song.isPlaying, !song.lines.isEmpty, song.songEnd > now else {
-            return completion(Timeline(entries: entries, policy: .never))
+            // If the app's next update gets dropped, check again on our own once this song
+            // should be over (not sooner: widget refreshes are rationed).
+            let policy: TimelineReloadPolicy = song.isPlaying
+                ? .after(max(song.songEnd, now.addingTimeInterval(15))) : .never
+            return completion(Timeline(entries: entries, policy: policy))
         }
         for (i, line) in song.lines.enumerated() {
             let date = song.songStart.addingTimeInterval(line.time)
