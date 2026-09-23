@@ -1,8 +1,6 @@
-import AuthenticationServices
-import CryptoKit
 import Foundation
 import Security
-import UIKit
+import SpotifyLogin
 
 struct SpotifyTokens: Codable {
     var accessToken: String
@@ -11,17 +9,18 @@ struct SpotifyTokens: Codable {
 }
 
 enum SpotifyAuthError: LocalizedError {
-    case notLoggedIn, badCallback, tokenExchange(String)
+    case notLoggedIn, notConfigured, badCallback, tokenExchange(String)
     var errorDescription: String? {
         switch self {
         case .notLoggedIn: "Not logged in to Spotify."
+        case .notConfigured: "No Spotify client ID set. Add yours to Config.xcconfig and rebuild."
         case .badCallback: "Spotify login was canceled."
         case .tokenExchange(let msg): "Spotify didn't accept the login. \(msg)"
         }
     }
 }
 
-/// Authorization Code + PKCE flow (no client secret on device).
+/// Spotify login (Authorization Code with PKCE, no client secret on the device) and token refresh.
 @MainActor
 final class SpotifyAuth: NSObject, ObservableObject {
     @Published private(set) var isLoggedIn: Bool
@@ -51,43 +50,29 @@ final class SpotifyAuth: NSObject, ObservableObject {
         return SpotifyTokens(accessToken: "", refreshToken: imported.refresh_token, expiresAt: .distantPast)
     }
 
+    /// Logs in through the Spotify app when it's installed (you just tap Agree), and falls
+    /// back to Spotify's web login otherwise. Spotify's SpotifyLogin package handles PKCE.
     func logIn() async throws {
-        let verifier = Self.randomString(length: 64)
-        let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded()
-
-        var comps = URLComponents(string: "https://accounts.spotify.com/authorize")!
-        comps.queryItems = [
-            .init(name: "client_id", value: Config.spotifyClientID),
-            .init(name: "response_type", value: "code"),
-            .init(name: "redirect_uri", value: Config.redirectURI),
-            .init(name: "code_challenge_method", value: "S256"),
-            .init(name: "code_challenge", value: challenge),
-            .init(name: "scope", value: Config.scopes),
-        ]
-
-        let callback: URL = try await withCheckedThrowingContinuation { cont in
-            let session = ASWebAuthenticationSession(
-                url: comps.url!, callback: .customScheme(Config.redirectScheme)
-            ) { url, error in
-                if let url { cont.resume(returning: url) } else { cont.resume(throwing: error ?? SpotifyAuthError.badCallback) }
-            }
-            session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = false
-            session.start()
+        guard Config.isSpotifyConfigured else { throw SpotifyAuthError.notConfigured }
+        let session: Session = try await withCheckedThrowingContinuation { cont in
+            loginContinuation = cont
+            sessionManager.initiateSession(with: [.userReadCurrentlyPlaying, .userReadPlaybackState])
         }
-
-        guard let code = URLComponents(url: callback, resolvingAgainstBaseURL: false)?
-            .queryItems?.first(where: { $0.name == "code" })?.value
-        else { throw SpotifyAuthError.badCallback }
-
-        tokens = try await requestTokens([
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": Config.redirectURI,
-            "client_id": Config.spotifyClientID,
-            "code_verifier": verifier,
-        ], previousRefresh: nil)
+        tokens = SpotifyTokens(accessToken: session.accessToken, refreshToken: session.refreshToken,
+                               expiresAt: session.expirationDate)
     }
+
+    /// The Spotify app sends the login back to carlyrics://callback.
+    func handle(_ url: URL) {
+        _ = sessionManager.openURL(url)
+    }
+
+    private lazy var sessionManager = SessionManager(
+        configuration: SpotifyLogin.Configuration(clientID: Config.spotifyClientID,
+                                                  redirectURL: URL(string: Config.redirectURI)!),
+        delegate: self
+    )
+    private var loginContinuation: CheckedContinuation<Session, Error>?
 
     func logOut() { tokens = nil }
 
@@ -134,30 +119,21 @@ final class SpotifyAuth: NSObject, ObservableObject {
         return SpotifyTokens(accessToken: r.access_token, refreshToken: refresh,
                              expiresAt: Date().addingTimeInterval(r.expires_in))
     }
-
-    private static func randomString(length: Int) -> String {
-        let chars = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
-        return String((0..<length).map { _ in chars.randomElement()! })
-    }
 }
 
-extension SpotifyAuth: ASWebAuthenticationPresentationContextProviding {
-    nonisolated func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        MainActor.assumeIsolated {
-            UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap(\.windows)
-                .first(where: \.isKeyWindow) ?? ASPresentationAnchor()
+extension SpotifyAuth: SessionManagerDelegate {
+    nonisolated func sessionManager(manager: SessionManager, didInitiate session: Session) {
+        Task { @MainActor in
+            self.loginContinuation?.resume(returning: session)
+            self.loginContinuation = nil
         }
     }
-}
 
-private extension Data {
-    func base64URLEncoded() -> String {
-        base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
+    nonisolated func sessionManager(manager: SessionManager, didFailWith error: Error) {
+        Task { @MainActor in
+            self.loginContinuation?.resume(throwing: error)
+            self.loginContinuation = nil
+        }
     }
 }
 
@@ -170,7 +146,7 @@ private extension String {
 }
 
 private enum Keychain {
-    static let service = "com.elimanning.carlyrics.spotify"
+    static let service = Config.bundleID + ".spotify"
 
     static func save(_ tokens: SpotifyTokens?) {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
