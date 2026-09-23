@@ -20,3 +20,8 @@ Dynamic Lyrics' paid real-time widget.
 - `CarLyrics/` — app: auth, Spotify API, LRCLIB lookup, sync engine, keep-alive, UI
 - `CarLyricsWidget/` — Live Activity views (CarPlay `.small`, Lock Screen, Dynamic Island)
 - `Shared/` — `LyricsActivityAttributes`
+
+### If Spotify login fails on the phone
+Spotify's login page sometimes errors ("Oops! Something went wrong") inside the in-app sheet.
+With the phone plugged in: `python3 tools/login_on_mac.py <device-udid>` (UDID from
+`xcrun devicectl list devices`). It logs in via your Mac browser and copies the token into the app.

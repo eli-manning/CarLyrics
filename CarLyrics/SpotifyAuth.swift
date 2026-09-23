@@ -32,10 +32,23 @@ final class SpotifyAuth: NSObject, ObservableObject {
     private var refreshTask: Task<SpotifyTokens, Error>?
 
     override init() {
-        let stored = Keychain.load()
+        let stored = Self.importFromMac() ?? Keychain.load()
         tokens = stored
         isLoggedIn = stored != nil
         super.init()
+        Keychain.save(stored)
+    }
+
+    /// `tools/login_on_mac.py` drops Documents/spotify_import.json into the app container
+    /// when logging in on the phone isn't working. Consumed once, then deleted.
+    private static func importFromMac() -> SpotifyTokens? {
+        let url = URL.documentsDirectory.appending(path: "spotify_import.json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        try? FileManager.default.removeItem(at: url)
+        struct Import: Decodable { let refresh_token: String }
+        guard let imported = try? JSONDecoder().decode(Import.self, from: data) else { return nil }
+        // Expired on purpose: the first API call refreshes it into a real access token.
+        return SpotifyTokens(accessToken: "", refreshToken: imported.refresh_token, expiresAt: .distantPast)
     }
 
     func logIn() async throws {
