@@ -74,7 +74,7 @@ final class LyricsEngine: ObservableObject {
 
     func startLiveActivity() {
         guard activity.areActivitiesEnabled else {
-            errorMessage = "Live Activities are off. Enable them in Settings → CarLyrics."
+            errorMessage = "Live Activities are turned off for CarLyrics. You can turn them on in Settings > CarLyrics."
             return
         }
         do {
@@ -83,7 +83,7 @@ final class LyricsEngine: ObservableObject {
             liveActivityOn = true
             start()
         } catch {
-            errorMessage = "Couldn't start Live Activity: \(error.localizedDescription)"
+            errorMessage = "Couldn't start the lyrics card. \(error.localizedDescription)"
         }
     }
 
@@ -159,10 +159,10 @@ final class LyricsEngine: ObservableObject {
         var lineStart = now, lineEnd = now.addingTimeInterval(1)
 
         switch status {
-        case .loading: current = "Finding lyrics…"
-        case .notFound: current = "No lyrics found"
-        case .instrumental: current = "♪ Instrumental ♪"
-        case .idle: current = "♪"
+        case .loading: current = "Looking up lyrics…"
+        case .notFound: current = "Couldn't find lyrics for this one"
+        case .instrumental: current = "Instrumental"
+        case .idle: current = "Waiting for a song"
         case .found:
             if let i = currentIndex {
                 current = text(i); previous = text(i - 1); next = text(i + 1)

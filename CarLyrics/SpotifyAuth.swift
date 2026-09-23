@@ -15,8 +15,8 @@ enum SpotifyAuthError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notLoggedIn: "Not logged in to Spotify."
-        case .badCallback: "Spotify login was cancelled or returned no code."
-        case .tokenExchange(let msg): "Spotify token error: \(msg)"
+        case .badCallback: "Spotify login was canceled."
+        case .tokenExchange(let msg): "Spotify didn't accept the login. \(msg)"
         }
     }
 }

@@ -24,8 +24,8 @@ enum SpotifyAPIError: LocalizedError {
     case rateLimited(retryAfter: TimeInterval), http(Int)
     var errorDescription: String? {
         switch self {
-        case .rateLimited(let s): "Spotify rate limit — retrying in \(Int(s))s"
-        case .http(let code): "Spotify returned HTTP \(code)"
+        case .rateLimited(let s): "Spotify is limiting requests. Trying again in \(Int(s)) seconds."
+        case .http(let code): "Spotify returned an error (HTTP \(code))."
         }
     }
 }
