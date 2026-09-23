@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -91,6 +92,20 @@ enum WidgetLookup {
     }
 }
 
+/// Tapping the widget runs this: it looks up what's playing right now and redraws.
+/// Taps don't count against the widget's daily refresh budget.
+struct RefreshLyricsIntent: AppIntent {
+    static let title: LocalizedStringResource = "Refresh Lyrics"
+    static let isDiscoverable = false
+
+    func perform() async throws -> some IntentResult {
+        if let result = await WidgetLookup.currentSong(previous: SharedStore.load()) {
+            SharedStore.save(result.song)
+        }
+        return .result()
+    }
+}
+
 struct LyricsWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: SharedStore.widgetKind, provider: LyricsProvider()) { entry in
@@ -107,9 +122,11 @@ struct LyricsWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        content
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .containerBackground(for: .widget) {
+        Button(intent: RefreshLyricsIntent()) {
+            content.frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .buttonStyle(.plain)
+        .containerBackground(for: .widget) {
                 Color(hex: entry.song?.tintHex ?? Color.defaultTintHex)
             }
     }
@@ -123,6 +140,8 @@ struct LyricsWidgetView: View {
                 HStack(spacing: 4) {
                     if !song.isPlaying { Image(systemName: "pause.fill") }
                     Text(song.title).lineLimit(1)
+                    // Hints that a tap refreshes.
+                    Image(systemName: "arrow.clockwise").font(.system(size: 8, weight: .bold)).opacity(0.7)
                 }
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
@@ -153,6 +172,9 @@ struct LyricsWidgetView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                 Spacer(minLength: 0)
+                Text("Tap to refresh")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.45))
             }
         }
     }
