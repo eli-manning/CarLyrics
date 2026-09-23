@@ -120,9 +120,21 @@ struct LyricsWidgetView: View {
 }
 
 /// Shows the whole line at the largest size that fits, instead of cutting it off.
+/// Used by the widget and the Live Activity.
 struct FittedLine: View {
-    let text: String
+    let text: AttributedString
     let sizes: [CGFloat]
+
+    init(text: String, sizes: [CGFloat]) {
+        var plain = AttributedString(text)
+        plain.foregroundColor = .white
+        self.init(attributed: plain, sizes: sizes)
+    }
+
+    init(attributed: AttributedString, sizes: [CGFloat]) {
+        self.text = attributed
+        self.sizes = sizes
+    }
 
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -137,7 +149,6 @@ struct FittedLine: View {
     private func label(_ size: CGFloat) -> some View {
         Text(text)
             .font(.system(size: size, weight: .bold))
-            .foregroundStyle(.white)
             .multilineTextAlignment(.center)
     }
 }
