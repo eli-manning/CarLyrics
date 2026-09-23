@@ -43,7 +43,7 @@ struct LoginView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Lyrics for whatever").foregroundStyle(.white.opacity(0.3))
                 Text("you're playing on Spotify,").foregroundStyle(.white)
-                Text("one line at a time.").foregroundStyle(.white.opacity(0.3))
+                Text("as they're sung.").foregroundStyle(.white.opacity(0.3))
             }
             .font(lyricFont)
 
@@ -190,7 +190,13 @@ struct LyricsScroller: View {
                     }
                     ForEach(engine.lyrics?.lines ?? []) { line in
                         let isCurrent = line.id == engine.currentIndex
-                        Text(line.text)
+                        Group {
+                            if isCurrent, engine.lyrics?.isSynced == true {
+                                KaraokeLine(line: line, end: lineEnd(after: line)) { engine.position }
+                            } else {
+                                Text(line.text)
+                            }
+                        }
                             .font(lyricFont)
                             .foregroundStyle(.white.opacity(isCurrent ? 1 : 0.32))
                             .blur(radius: isCurrent ? 0 : 0.4)
@@ -207,6 +213,11 @@ struct LyricsScroller: View {
             }
             .onAppear { proxy.scrollTo(engine.currentIndex ?? 0, anchor: UnitPoint(x: 0, y: 0.35)) }
         }
+    }
+
+    private func lineEnd(after line: LyricLine) -> TimeInterval {
+        let lines = engine.lyrics?.lines ?? []
+        return line.id + 1 < lines.count ? lines[line.id + 1].time : (engine.track?.duration ?? line.time + 5)
     }
 
     private func message(_ text: String) -> some View {
@@ -257,3 +268,36 @@ struct SettingsView: View {
     }
 }
 
+/// Lights up the current line word by word. LRCLIB only times whole lines, so each
+/// word's start is estimated from its share of the line's characters.
+struct KaraokeLine: View {
+    let line: LyricLine
+    let end: TimeInterval
+    let position: () -> TimeInterval
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30)) { _ in
+            Text(highlighted(at: position()))
+        }
+    }
+
+    private func highlighted(at pos: TimeInterval) -> AttributedString {
+        let words = line.text.split(separator: " ")
+        let totalChars = Double(words.reduce(0) { $0 + $1.count + 1 })
+        // Singers rarely stretch a line across the whole gap before the next one,
+        // so cap the sung part at roughly 14 characters per second.
+        let sung = min(end - line.time, max(1.2, totalChars * 0.07))
+
+        var out = AttributedString()
+        var charsBefore = 0.0
+        for (i, word) in words.enumerated() {
+            let wordStart = line.time + sung * charsBefore / totalChars
+            let lit = min(max((pos - wordStart) / 0.15, 0), 1)
+            var piece = AttributedString(i == 0 ? String(word) : " " + word)
+            piece.foregroundColor = .white.opacity(0.32 + 0.68 * lit)
+            out += piece
+            charsBefore += Double(word.count + 1)
+        }
+        return out
+    }
+}
