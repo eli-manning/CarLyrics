@@ -45,7 +45,9 @@ targets:
         UIUserInterfaceStyle: Dark
         NSSupportsLiveActivities: true
         NSSupportsLiveActivitiesFrequentUpdates: true
-        UIBackgroundModes: [audio]
+        UIBackgroundModes: [audio, location]
+        NSLocationWhenInUseUsageDescription: CarLyrics runs location in the background so iOS lets it keep the lyrics card on the Lock Screen and in CarPlay up to date. Your location isn't used or stored.
+        NSLocationAlwaysAndWhenInUseUsageDescription: With Always, the Start Lyrics shortcut can keep the lyrics card up to date when CarPlay connects, without opening the app. Your location isn't used or stored.
         LSApplicationQueriesSchemes: [spotify]
         CFBundleURLTypes:
           - CFBundleURLName: $(CARLYRICS_BUNDLE_ID)

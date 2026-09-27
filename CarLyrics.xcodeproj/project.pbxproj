@@ -16,6 +16,7 @@
 		2C4B07E0C1CDDBB51B1DBF30 /* CarLyricsWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1068EACD9720B9AC7FB1BF /* CarLyricsWidgetBundle.swift */; };
 		30237C7D0A2277E00D491CA7 /* ArtworkPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */; };
 		36F7B9C3B574CB99C0DDF98C /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */; };
+		412F276457CC1C327C39B5EE /* BackgroundLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C4194E79336F90701933426 /* BackgroundLocation.swift */; };
 		447748D977C7480E0EB3EC97 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52814CA5EC27BF297C76F4A /* Diagnostics.swift */; };
 		45810DE482EC4A871C752748 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC24411FCA4EBF931207891E /* AppModel.swift */; };
 		5B1985B51B2BE4CDA5A12651 /* LyricsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686849A770E6F70C8F1568A6 /* LyricsWidget.swift */; };
@@ -79,6 +80,7 @@
 		6D63B7C0B74F1C62F11C695C /* CarLyrics.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CarLyrics.entitlements; sourceTree = "<group>"; };
 		72CB50D44404E124001B0952 /* WidgetSong.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSong.swift; sourceTree = "<group>"; };
 		7CEE377E6DBFAC838B0B39A9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		8C4194E79336F90701933426 /* BackgroundLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundLocation.swift; sourceTree = "<group>"; };
 		9B894422A2B6FC864DBA7EE1 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		AEEE32790827C71F7BCD9F31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B52814CA5EC27BF297C76F4A /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
@@ -91,7 +93,7 @@
 		E0972B9E8C8EB3C5E1A186B5 /* LiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityController.swift; sourceTree = "<group>"; };
 		E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsActivityAttributes.swift; sourceTree = "<group>"; };
 		EC24411FCA4EBF931207891E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		"TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		"TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				EC24411FCA4EBF931207891E /* AppModel.swift */,
 				AEEE32790827C71F7BCD9F31 /* Assets.xcassets */,
 				6700376D3D3975A308935962 /* BackgroundKeepAlive.swift */,
+				8C4194E79336F90701933426 /* BackgroundLocation.swift */,
 				6D63B7C0B74F1C62F11C695C /* CarLyrics.entitlements */,
 				5210E13650B295ADF15BE701 /* CarLyricsApp.swift */,
 				7CEE377E6DBFAC838B0B39A9 /* Config.swift */,
@@ -171,10 +174,10 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		"TEMP_07070574-1A7F-4395-B9B1-B14C9A523C01" /* CarLyrics */ = {
+		"TEMP_4836AC0D-F6D0-4F73-BE15-25E1BF21D104" /* CarLyrics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */,
+				"TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */,
 			);
 			path = CarLyrics;
 			sourceTree = "<group>";
@@ -282,6 +285,7 @@
 				45810DE482EC4A871C752748 /* AppModel.swift in Sources */,
 				30237C7D0A2277E00D491CA7 /* ArtworkPalette.swift in Sources */,
 				C0E521FB329335673913B7D0 /* BackgroundKeepAlive.swift in Sources */,
+				412F276457CC1C327C39B5EE /* BackgroundLocation.swift in Sources */,
 				7E240AB4DACF0B940AEDC53E /* CarLyricsApp.swift in Sources */,
 				8D42C86FCC71BC9BC645FA10 /* Config.swift in Sources */,
 				447748D977C7480E0EB3EC97 /* Diagnostics.swift in Sources */,
@@ -329,7 +333,7 @@
 /* Begin XCBuildConfiguration section */
 		23CB6163D1568275BF42DECE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -443,7 +447,7 @@
 		};
 		B661031D5EB55CE710244241 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_D7BF955E-DE9B-4FA7-BCA4-D3CE5BF4FCC5" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

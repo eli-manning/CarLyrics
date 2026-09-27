@@ -40,11 +40,13 @@ final class LyricsEngine: ObservableObject {
     private var keepCardUp = false
     private var lastWidgetSong: WidgetSong?
     private var widgetReloadTask: Task<Void, Never>?
+    private var lastWidgetReload = Date.distantPast
     private var lastHeartbeat = Date.distantPast
 
     let auth: SpotifyAuth
     private let activity = LiveActivityController()
     private let keepAlive = BackgroundKeepAlive()
+    private let location = BackgroundLocation()
     private var snapshot: PlaybackSnapshot?
     private var loop: Task<Void, Never>?
     private var nextPoll = Date.distantPast
@@ -69,6 +71,7 @@ final class LyricsEngine: ObservableObject {
             while !Task.isCancelled {
                 guard let self else { return }
                 if Date() >= self.nextPoll { await self.poll() }
+                self.keepAlive.check()
                 self.tick()
                 try? await Task.sleep(for: .milliseconds(150))
             }
@@ -108,6 +111,7 @@ final class LyricsEngine: ObservableObject {
         lastPlayingAt = Date()
         nextShowAttempt = .distantPast
         keepAlive.start()
+        location.start()
         start()
         updateCardVisibility()
     }
@@ -116,6 +120,7 @@ final class LyricsEngine: ObservableObject {
         keepCardUp = false
         activity.end()
         keepAlive.stop()
+        location.stop()
         liveActivityOn = false
     }
 
@@ -235,14 +240,22 @@ final class LyricsEngine: ObservableObject {
         lastWidgetSong = song
         SharedStore.save(song)
         // Coalesce bursts (new song, then artwork color, then a seek) into one reload.
-        widgetReloadTask?.cancel()
-        widgetReloadTask = Task {
-            try? await Task.sleep(for: .seconds(1))
-            guard !Task.isCancelled else { return }
-            WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
-        }
+        reloadWidget(after: 1)
         if songChanged {
             Diagnostics.log("widget updated: \(song?.title ?? "nothing playing"), \(song?.lines.count ?? 0) lines, readable: \(SharedStore.load() != nil)")
+        }
+    }
+
+    /// Asks iOS to redraw the widget, at most every couple of seconds (iOS drops reloads
+    /// that come closer together, and a later request replaces a pending one).
+    private func reloadWidget(after delay: TimeInterval) {
+        widgetReloadTask?.cancel()
+        let wait = max(delay, 2 - Date().timeIntervalSince(lastWidgetReload))
+        widgetReloadTask = Task {
+            try? await Task.sleep(for: .seconds(wait))
+            guard !Task.isCancelled else { return }
+            self.lastWidgetReload = Date()
+            WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
         }
     }
 
@@ -250,7 +263,7 @@ final class LyricsEngine: ObservableObject {
         guard Date().timeIntervalSince(lastHeartbeat) > 60 else { return }
         lastHeartbeat = Date()
         let state = UIApplication.shared.applicationState == .background ? "background" : "foreground"
-        Diagnostics.log("alive (\(state)), playing: \(isPlaying), card: \(activity.isActive), line: \(currentIndex.map(String.init) ?? "-")")
+        Diagnostics.log("alive (\(state)), playing: \(isPlaying), card: \(activity.isActive), line: \(currentIndex.map(String.init) ?? "-"), location: \(location.isRunning)")
     }
 
     // MARK: Line tracking

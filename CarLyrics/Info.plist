@@ -35,6 +35,10 @@
 	<array>
 		<string>spotify</string>
 	</array>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>With Always, the Start Lyrics shortcut can keep the lyrics card up to date when CarPlay connects, without opening the app. Your location isn't used or stored.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CarLyrics runs location in the background so iOS lets it keep the lyrics card on the Lock Screen and in CarPlay up to date. Your location isn't used or stored.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
@@ -48,6 +52,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
