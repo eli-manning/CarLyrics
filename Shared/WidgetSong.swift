@@ -31,10 +31,11 @@ struct WidgetSong: Codable, Equatable {
     }
 
     /// Same song and lyrics, and the start time moved less than `tolerance` seconds.
+    /// While paused the start time slides forward every second, which doesn't matter.
     func matches(_ other: WidgetSong, tolerance: TimeInterval = 1.5) -> Bool {
         var a = self, b = other
         a.songStart = .distantPast; b.songStart = .distantPast
-        return a == b && abs(songStart.timeIntervalSince(other.songStart)) < tolerance
+        return a == b && (!isPlaying || abs(songStart.timeIntervalSince(other.songStart)) < tolerance)
     }
 }
 
