@@ -214,8 +214,8 @@ struct FittedLine: View {
             ForEach(sizes, id: \.self) { size in
                 label(size).fixedSize(horizontal: false, vertical: true)
             }
-            // Nothing fit completely: use the smallest size and let it trail off.
-            label(sizes.last ?? 12)
+            // Nothing fit completely: shrink the smallest size further rather than cut it off.
+            label(sizes.last ?? 12).minimumScaleFactor(0.5)
         }
     }
 
