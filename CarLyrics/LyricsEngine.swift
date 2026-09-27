@@ -38,6 +38,7 @@ final class LyricsEngine: ObservableObject {
     private let sleepAfter: TimeInterval = 30 * 60
     /// Set by the Start Lyrics shortcut: the card stays up through pauses until Stop Lyrics.
     private var keepCardUp = false
+    private var startedFromShortcutAt = Date.distantPast
     private var lastWidgetSong: WidgetSong?
     private var widgetReloadTask: Task<Void, Never>?
     private var lastWidgetReload = Date.distantPast
@@ -105,7 +106,7 @@ final class LyricsEngine: ObservableObject {
             errorMessage = "Live Activities are turned off for CarLyrics. You can turn them on in Settings > CarLyrics."
             return
         }
-        if keepUp { keepCardUp = true }
+        if keepUp { keepCardUp = true; startedFromShortcutAt = Date() }
         liveActivityOn = true
         // Count from now, so the card has time to appear once a song starts.
         lastPlayingAt = Date()
@@ -114,6 +115,16 @@ final class LyricsEngine: ObservableObject {
         location.start()
         start()
         updateCardVisibility()
+    }
+
+    /// The Stop Lyrics shortcut. CarPlay can fire the connect and disconnect automations
+    /// together when it connects, so a Stop right after a Start is ignored.
+    func stopFromShortcut() {
+        guard Date().timeIntervalSince(startedFromShortcutAt) > 15 else {
+            Diagnostics.log("ignored Stop Lyrics right after Start Lyrics")
+            return
+        }
+        stopLiveActivity()
     }
 
     func stopLiveActivity() {

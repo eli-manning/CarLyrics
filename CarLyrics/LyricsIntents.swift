@@ -26,7 +26,7 @@ struct StopLyricsIntent: LiveActivityIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        AppModel.engine.stopLiveActivity()
+        AppModel.engine.stopFromShortcut()
         return .result()
     }
 }
