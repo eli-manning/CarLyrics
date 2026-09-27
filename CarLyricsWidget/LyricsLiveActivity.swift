@@ -55,23 +55,40 @@ struct LyricsCard: View {
     // MARK: CarPlay
 
     private var carPlay: some View {
-        VStack(spacing: 4) {
-            lyric(withNext: [22, 19, 17], alone: [22, 20, 18, 16, 14, 12], nextSize: 11)
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                if !state.isPlaying { Image(systemName: "pause.fill") }
+                Text(state.title).lineLimit(1)
+            }
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(.white.opacity(0.5))
+
+            FittedLine(attributed: currentLine, sizes: [22, 19, 17, 15, 13, 12])
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            if state.isPlaying {
-                LineProgress(state: state)
-            } else {
-                // Paused: a progress bar would sit still, so say so instead.
-                Label(state.title, systemImage: "pause.fill")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.6))
+                .contentTransition(.opacity)
+
+            // A preview of what's coming. Cutting it off is fine; it shows in full next.
+            if !state.nextLine.isEmpty {
+                Text(state.nextLine)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.45))
                     .lineLimit(1)
+                    .truncationMode(.tail)
             }
         }
         .padding(.horizontal, 10)
-        .padding(.top, 7)
-        .padding(.bottom, 6)
+        .padding(.top, 5)
+        .padding(.bottom, 9)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The progress bar hugs the bottom edge so it takes no room from the lyrics.
+        .overlay(alignment: .bottom) {
+            if state.isPlaying {
+                LineProgress(state: state)
+                    .scaleEffect(x: 1, y: 0.6)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 3)
+            }
+        }
     }
 
     // MARK: Lock Screen and Dynamic Island
@@ -118,6 +135,7 @@ struct LyricsCard: View {
                             .foregroundStyle(.white.opacity(0.45))
                             .multilineTextAlignment(.center)
                             .lineLimit(1)
+                            .truncationMode(.tail)
                     }
                     .fixedSize(horizontal: false, vertical: true)
                 }
