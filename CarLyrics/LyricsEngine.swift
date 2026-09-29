@@ -33,10 +33,6 @@ final class LyricsEngine: ObservableObject {
     /// Last time Spotify reported something playing; the card hides after a quiet stretch.
     private var lastPlayingAt = Date.distantPast
     private var nextShowAttempt = Date.distantPast
-    /// Swap in a fresh card this often, before iOS starts rationing its updates
-    /// (seen as early as 13 minutes in).
-    private let renewCardAfter: TimeInterval = 8 * 60
-    private var nextRenewAttempt = Date.distantPast
     private let hideCardAfter: TimeInterval = 30
     /// After this long with nothing playing, stop running in the background to save battery.
     private let sleepAfter: TimeInterval = 30 * 60
@@ -121,6 +117,16 @@ final class LyricsEngine: ObservableObject {
         updateCardVisibility()
     }
 
+    /// Tapping the card: swaps in a fresh one, since iOS slows a card's updates after a while.
+    func renewCard() {
+        guard liveActivityOn else { return }
+        if activity.isActive {
+            activity.renew(with: activityState())
+        } else {
+            try? activity.start(with: activityState())
+        }
+    }
+
     /// The Stop Lyrics shortcut. CarPlay can fire the connect and disconnect automations
     /// together when it connects, so a Stop right after a Start is ignored.
     func stopFromShortcut() {
@@ -143,9 +149,6 @@ final class LyricsEngine: ObservableObject {
     private func updateCardVisibility() {
         guard liveActivityOn else { return }
         let now = Date()
-        if activity.isActive, now.timeIntervalSince(activity.startedAt) > renewCardAfter, now >= nextRenewAttempt {
-            if !activity.renew(with: activityState()) { nextRenewAttempt = now.addingTimeInterval(60) }
-        }
         if keepCardUp {
             if !activity.isActive, now >= nextShowAttempt {
                 nextShowAttempt = now.addingTimeInterval(20)

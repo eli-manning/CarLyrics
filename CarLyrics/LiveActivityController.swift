@@ -47,7 +47,8 @@ final class LiveActivityController {
     }
 
     /// Swaps in a fresh card so its updates aren't rationed. The old card is only ended
-    /// once the new one is up, so if iOS refuses (it may in the background) nothing changes.
+    /// once the new one is up, so if iOS refuses nothing changes. From the background this
+    /// only works inside a LiveActivityIntent (tapping the card).
     @discardableResult
     func renew(with state: LyricsActivityAttributes.ContentState) -> Bool {
         guard let old = activity else { return false }

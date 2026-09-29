@@ -6,6 +6,10 @@ struct CarLyricsApp: App {
     @ObservedObject private var engine = AppModel.engine
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        RenewCardIntent.run = { AppModel.engine.renewCard() }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {

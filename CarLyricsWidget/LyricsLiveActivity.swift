@@ -32,7 +32,11 @@ struct LyricsActivityView: View {
     @Environment(\.activityFamily) private var family
 
     var body: some View {
-        LyricsCard(state: state, style: family == .small ? .carPlay : .lockScreen)
+        // Tapping swaps in a fresh card, for when iOS has slowed this one's updates.
+        Button(intent: RenewCardIntent()) {
+            LyricsCard(state: state, style: family == .small ? .carPlay : .lockScreen)
+        }
+        .buttonStyle(.plain)
     }
 }
 

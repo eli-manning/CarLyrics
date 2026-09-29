@@ -37,7 +37,9 @@
 		C7FB7FF80F79F6DE148E48E8 /* LyricsLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134372745DA0313D83BF4580 /* LyricsLiveActivity.swift */; };
 		E2130C2E756B6D1A265F84D9 /* LyricsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F33C0E47A57B894FD2941A /* LyricsEngine.swift */; };
 		E6C0821D1EEEB5B84D1E7C0B /* LiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0972B9E8C8EB3C5E1A186B5 /* LiveActivityController.swift */; };
+		E931AD79AF4B0442F0379E0B /* RenewCardIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DD71B3ECC32BEBC48A902E /* RenewCardIntent.swift */; };
 		F4ED3F9D5C67F89D2FC59988 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B894422A2B6FC864DBA7EE1 /* Views.swift */; };
+		F77E2EE8152D8F4729DDDDF6 /* RenewCardIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DD71B3ECC32BEBC48A902E /* RenewCardIntent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +84,7 @@
 		7CEE377E6DBFAC838B0B39A9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		8C4194E79336F90701933426 /* BackgroundLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundLocation.swift; sourceTree = "<group>"; };
 		9B894422A2B6FC864DBA7EE1 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		A3DD71B3ECC32BEBC48A902E /* RenewCardIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenewCardIntent.swift; sourceTree = "<group>"; };
 		AEEE32790827C71F7BCD9F31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B52814CA5EC27BF297C76F4A /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
 		BF89F5421F1CC4DC43C549BE /* SpotifyAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAuth.swift; sourceTree = "<group>"; };
@@ -93,7 +96,7 @@
 		E0972B9E8C8EB3C5E1A186B5 /* LiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityController.swift; sourceTree = "<group>"; };
 		E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsActivityAttributes.swift; sourceTree = "<group>"; };
 		EC24411FCA4EBF931207891E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		"TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		"TEMP_67D5097B-60D0-412F-8894-1D22E82FFB21" /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +169,7 @@
 				0A220FAB5530FB57B9C679CA /* ArtworkPalette.swift */,
 				E3C465B6137E640653D51F50 /* LyricsActivityAttributes.swift */,
 				CF8BE70CF00CE1FBAD9D9B15 /* LyricsService.swift */,
+				A3DD71B3ECC32BEBC48A902E /* RenewCardIntent.swift */,
 				0431E0ED0E530CB3D2074A47 /* SpotifyAPI.swift */,
 				5FF245A612F68E00B52785D5 /* SpotifyTokenStore.swift */,
 				72CB50D44404E124001B0952 /* WidgetSong.swift */,
@@ -174,10 +178,10 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		"TEMP_4836AC0D-F6D0-4F73-BE15-25E1BF21D104" /* CarLyrics */ = {
+		"TEMP_269F917A-DBC6-48CC-804C-6C8697C13166" /* CarLyrics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */,
+				"TEMP_67D5097B-60D0-412F-8894-1D22E82FFB21" /* Base.xcconfig */,
 			);
 			path = CarLyrics;
 			sourceTree = "<group>";
@@ -294,6 +298,7 @@
 				E2130C2E756B6D1A265F84D9 /* LyricsEngine.swift in Sources */,
 				6F60CFCE14A6A068000CB537 /* LyricsIntents.swift in Sources */,
 				B5C67960337B68C041952568 /* LyricsService.swift in Sources */,
+				F77E2EE8152D8F4729DDDDF6 /* RenewCardIntent.swift in Sources */,
 				36F7B9C3B574CB99C0DDF98C /* SpotifyAPI.swift in Sources */,
 				15EFDDE3CDDB06FDEF514B2D /* SpotifyAuth.swift in Sources */,
 				660E9B6657A15F1F9DFB1C8D /* SpotifyTokenStore.swift in Sources */,
@@ -313,6 +318,7 @@
 				C7FB7FF80F79F6DE148E48E8 /* LyricsLiveActivity.swift in Sources */,
 				A1AE24D265E2326AB60145AC /* LyricsService.swift in Sources */,
 				5B1985B51B2BE4CDA5A12651 /* LyricsWidget.swift in Sources */,
+				E931AD79AF4B0442F0379E0B /* RenewCardIntent.swift in Sources */,
 				8850CE2BE225FC73052A537C /* SpotifyAPI.swift in Sources */,
 				0C64DAECC37CE0F9EE6F4F84 /* SpotifyTokenStore.swift in Sources */,
 				5E62B4F56475412BFA654984 /* WidgetSong.swift in Sources */,
@@ -333,7 +339,7 @@
 /* Begin XCBuildConfiguration section */
 		23CB6163D1568275BF42DECE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_67D5097B-60D0-412F-8894-1D22E82FFB21" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -447,7 +453,7 @@
 		};
 		B661031D5EB55CE710244241 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_08AD8276-3DF7-4FEA-BE5D-72B3D4F3A288" /* Base.xcconfig */;
+			baseConfigurationReference = "TEMP_67D5097B-60D0-412F-8894-1D22E82FFB21" /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
