@@ -8,6 +8,10 @@ final class LiveActivityController {
     /// Picks up a card left over from a previous launch, so it can be updated or hidden.
     private var activity = Activity<LyricsActivityAttributes>.activities.first { $0.activityState == .active }
     private var lastState: LyricsActivityAttributes.ContentState?
+    /// When the current card was started and how many updates it has had. iOS rations a
+    /// card's updates, and once they run out it only redraws every ~10 seconds.
+    private(set) var startedAt = Date()
+    private var updateCount = 0
 
     var isActive: Bool { activity?.activityState == .active }
     var areActivitiesEnabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
@@ -25,6 +29,8 @@ final class LiveActivityController {
                 content: ActivityContent(state: state, staleDate: nil),
                 pushType: nil
             )
+            startedAt = Date()
+            updateCount = 0
             Diagnostics.log("card started (app state \(UIApplication.shared.applicationState.rawValue))")
         } catch {
             Diagnostics.log("card start failed (app state \(UIApplication.shared.applicationState.rawValue)): \(error.localizedDescription)")
@@ -36,7 +42,33 @@ final class LiveActivityController {
     func update(_ state: LyricsActivityAttributes.ContentState) {
         guard let activity, state != lastState else { return }
         lastState = state
+        updateCount += 1
         Task { await activity.update(ActivityContent(state: state, staleDate: nil)) }
+    }
+
+    /// Swaps in a fresh card so its updates aren't rationed. The old card is only ended
+    /// once the new one is up, so if iOS refuses (it may in the background) nothing changes.
+    @discardableResult
+    func renew(with state: LyricsActivityAttributes.ContentState) -> Bool {
+        guard let old = activity else { return false }
+        let appState = UIApplication.shared.applicationState.rawValue
+        let age = Int(Date().timeIntervalSince(startedAt) / 60)
+        do {
+            activity = try Activity.request(
+                attributes: LyricsActivityAttributes(),
+                content: ActivityContent(state: state, staleDate: nil),
+                pushType: nil
+            )
+        } catch {
+            Diagnostics.log("card renew failed after \(age) min, \(updateCount) updates (app state \(appState)): \(error.localizedDescription)")
+            return false
+        }
+        Diagnostics.log("card renewed after \(age) min, \(updateCount) updates (app state \(appState))")
+        lastState = state
+        startedAt = Date()
+        updateCount = 0
+        Task { await old.end(nil, dismissalPolicy: .immediate) }
+        return true
     }
 
     func end() {
